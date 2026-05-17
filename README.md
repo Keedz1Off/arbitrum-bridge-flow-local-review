@@ -1,5 +1,6 @@
 # Arbitrum Bridge Flow Local Review
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/6f117924-6973-4ab4-baa8-bc4b01dcaad8" />
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/42fed5d0-c626-4e97-8d7b-213140d17a87" />
+
 
 
 This repository contains my local security review and flow analysis of an Arbitrum-style token bridge.
