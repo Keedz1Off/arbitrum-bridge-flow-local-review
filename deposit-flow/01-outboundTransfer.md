@@ -34,14 +34,14 @@ Different gateway implementations may have different parameters and internal cal
 
 Its role is to connect:
 
-- user input;
-- token selection;
-- recipient selection;
-- amount accounting;
-- L1 escrow/lock logic;
-- calldata construction;
-- retryable ticket creation;
-- later L2 finalization.
+- user input
+- token selection
+- recipient selection
+- amount accounting
+- L1 escrow / lock logic
+- calldata construction
+- retryable ticket creation
+- later L2 finalization
 
 In simple terms:
 
@@ -69,12 +69,12 @@ Common critical parameters:
 
 Parameter meaning:
 
-- `l1Token`: source-chain token being deposited.
-- `to`: destination-chain recipient.
-- `amount`: requested deposit amount.
-- `data`: extra encoded parameters used by the bridge/gateway.
-- gas parameters: execution budget for the L2 retryable ticket.
-- refund addresses: addresses receiving unused retryable ticket funds.
+- `l1Token`: source-chain token being deposited
+- `to`: destination-chain recipient
+- `amount`: requested deposit amount
+- `data`: extra encoded parameters used by the bridge/gateway
+- gas parameters: execution budget for the L2 retryable ticket
+- refund addresses: addresses receiving unused retryable ticket funds
 
 ---
 
@@ -82,19 +82,19 @@ Parameter meaning:
 
 Trusted or semi-trusted:
 
-- configured gateway address;
-- configured inbox/bridge address;
-- validated token mapping;
-- expected counterpart gateway.
+- configured gateway address
+- configured inbox / bridge address
+- validated token mapping
+- expected counterpart gateway
 
 Untrusted:
 
-- user-supplied `amount`;
-- user-supplied `to`;
-- user-supplied `data`;
-- user-controlled gas values;
-- user-controlled refund addresses;
-- token contract behavior.
+- user-supplied `amount`
+- user-supplied `to`
+- user-supplied `data`
+- user-controlled gas values
+- user-controlled refund addresses
+- token contract behavior
 
 Important audit idea:
 
@@ -141,7 +141,7 @@ message that credits value on L2.
 Purpose:
 
 ```text
-Builds the calldata/payload that will be executed on L2.
+Builds the calldata / payload that will be executed on L2.
 ```
 
 Security meaning:
@@ -184,8 +184,8 @@ Function-level invariants:
 - The selected L1 token must be the intended token.
 - The L1 token must map to the correct L2 token.
 - The recipient encoded for L2 must equal the intended recipient.
-- Tokens must be escrowed/locked before L2 credit is finalized.
-- The amount encoded for L2 must match the amount actually escrowed/received.
+- Tokens must be escrowed / locked before L2 credit is finalized.
+- The amount encoded for L2 must match the amount actually escrowed / received.
 - The retryable ticket must target the correct L2 gateway.
 - The deposit message must not be executable twice.
 
@@ -305,7 +305,7 @@ Invalid cross-chain execution.
 - Who can call `outboundTransfer(...)`?
 - Which parameters are controlled by the user?
 - Is `l1Token` validated?
-- How is the correct L2 token/gateway selected?
+- How is the correct L2 token / gateway selected?
 - Does escrow happen before calldata is created?
 - Does the function encode nominal `amount` or `actualReceived`?
 - Can fee-on-transfer tokens break accounting?
@@ -314,7 +314,7 @@ Invalid cross-chain execution.
 - Does the retryable ticket target the expected L2 gateway?
 - Who controls refund addresses?
 - Can bad gas parameters cause a stuck deposit?
-- Is replay protection handled by the bridge/message system?
+- Is replay protection handled by the bridge / message system?
 - Can the same deposit be finalized twice?
 
 ---
@@ -329,7 +329,7 @@ bridge accounting flow.
 Main security boundary:
 
 ```text
-User input -> L1 escrow/accounting -> L2 message
+User input -> L1 escrow / accounting -> L2 message
 ```
 
 Most important invariant:
