@@ -1,20 +1,26 @@
-
-# Function Review: finalizeInboundTransfer(...)
+# Function Review: inboundEscrowTransfer(...) / mint(...)
 
 ## 1. Function Code
 
 ```solidity
-// Paste the exact finalizeInboundTransfer(...) source code here.
+// Paste the exact inboundEscrowTransfer(...) or mint(...) source code here.
 //
 // Example structure:
 //
-// function finalizeInboundTransfer(
+// function inboundEscrowTransfer(
 //     address _token,
-//     address _from,
 //     address _to,
-//     uint256 _amount,
-//     bytes calldata _data
-// ) external payable {
+//     uint256 _amount
+// ) internal {
+//     ...
+// }
+//
+// or
+//
+// function mint(
+//     address _to,
+//     uint256 _amount
+// ) external {
 //     ...
 // }
 ```
@@ -23,26 +29,27 @@ Note:
 
 ```text
 The exact function body should be copied from the reviewed contract version.
-Different gateway implementations may validate senders and decode data differently.
+Some bridge implementations release escrowed tokens, while others mint a representation token.
 ```
 
 ---
 
 ## 2. Function Purpose
 
-`finalizeInboundTransfer(...)` finalizes the deposit on the destination chain.
+`inboundEscrowTransfer(...)` / `mint(...)` is the final token-crediting step on
+the destination chain.
 
-For the deposit flow, this function is executed on L2 after the L1 -> L2 message
-has been delivered.
+For the deposit flow, this usually happens on L2 after
+`finalizeInboundTransfer(...)` verifies and processes the bridge message.
 
 In simple terms:
 
 ```text
-This function receives the bridge message and credits the user on L2.
+This is the function that actually gives the user tokens on L2.
 ```
 
-It is critical because this is where cross-chain message data becomes actual L2
-token credit.
+It is critical because this is where verified bridge message data turns into a
+real token balance change.
 
 ---
 
@@ -51,24 +58,20 @@ token credit.
 Common critical parameters:
 
 - `_token`
-- `_from`
 - `_to`
 - `_amount`
-- `_data`
-- `msg.sender`
-- original cross-chain sender
-- counterpart gateway address
+- token minter role
+- gateway address
+- bridge finalizer context
 
 Parameter meaning:
 
-- `_token`: token being finalized
-- `_from`: original sender / depositor
-- `_to`: destination-chain recipient
-- `_amount`: amount to mint or release
-- `_data`: additional encoded data
-- `msg.sender`: immediate caller of the function
-- original cross-chain sender: source-chain gateway that initiated the message
-- counterpart gateway address: trusted gateway on the other chain
+- `_token`: token being released or minted
+- `_to`: recipient receiving tokens on L2
+- `_amount`: amount to release or mint
+- token minter role: address allowed to mint representation tokens
+- gateway address: contract allowed to trigger token credit
+- finalizer context: verified message data from `finalizeInboundTransfer(...)`
 
 ---
 
@@ -76,28 +79,27 @@ Parameter meaning:
 
 Trusted only if verified:
 
-- bridge messenger / system caller
-- original cross-chain sender
-- expected counterpart gateway
-- decoded calldata from an authentic message
+- verified finalize data
+- expected gateway/finalizer
+- configured token mapping
+- authorized minter role
 
 Untrusted:
 
 - direct external calls
-- spoofed messages
-- unvalidated `_data`
-- decoded values without sender verification
-- raw `msg.sender` if address aliasing is ignored
-- user-influenced recipient or amount
+- unverified `_to`
+- unverified `_amount`
+- arbitrary token contracts
+- malicious token hooks/callbacks
+- unauthorized minter callers
 
 Important audit idea:
 
 ```text
-Finalization must only happen through an authentic bridge message.
+Mint/release must only happen after valid bridge finalization.
 ```
 
-A finalize function is dangerous if it trusts decoded parameters without proving
-that the message came from the correct bridge path.
+This function should not independently trust user-provided parameters.
 
 ---
 
@@ -106,136 +108,81 @@ that the message came from the correct bridge path.
 Typical deposit execution path:
 
 ```text
-createRetryableTicket(...)
-└── finalizeInboundTransfer(...) on L2
-    └── inboundEscrowTransfer(...) / mint(...)
+finalizeInboundTransfer(...)
+└── inboundEscrowTransfer(...) / mint(...)
 ```
 
 Security meaning:
 
 ```text
-This is the destination-chain finalization boundary.
+This is the token credit boundary.
 ```
 
-This is the point where a message becomes real token movement on L2.
+This is the final point where bridge accounting becomes an actual token balance.
 
 ---
 
 ## 6. Invariants
 
-Main finalization invariant:
+Main credit invariant:
 
 ```text
-Only an authentic L1 -> L2 bridge message may finalize a deposit.
+L2 minted / released amount = verified L1 escrowed amount
 ```
 
 Function-level invariants:
 
-- The caller/message sender must be the expected bridge path.
-- The original source-chain sender must be the trusted counterpart gateway.
-- The L2 credited amount must equal the valid L1 escrowed amount.
-- The recipient must match the encoded recipient from L1.
-- The token must match the expected L1/L2 token mapping.
-- The same message must not finalize twice.
-- Address aliasing must be handled correctly if the sender is an L1 contract.
+- Only the authorized gateway/finalizer may mint or release tokens.
+- `_amount` must come from verified bridge finalization data.
+- `_to` must be the intended recipient from the bridge message.
+- Minted/released token must match the expected L2 token.
+- L2 token supply must remain backed by L1 escrow.
+- The same finalized message must not cause multiple mint/release actions.
 
 ---
 
-## 7. Authentication Boundary
+## 7. Accounting Boundary
 
-The key question:
+This function is the final accounting step of the deposit flow.
 
-```text
-Who is allowed to finalize the transfer?
-```
-
-A strong authentication check should verify more than only `msg.sender`.
-
-It should verify:
-
-- bridge messenger / system caller
-- original L1 sender
-- expected counterpart gateway
-- correct bridge path
-- replay protection
-
-For Arbitrum L1 contract messages, address aliasing may apply:
+Trace:
 
 ```text
-Expected L1 gateway address -> expected aliased L2 sender
+L1 escrowed amount
+-> encoded amount
+-> decoded amount
+-> verified finalized amount
+-> minted / released amount on L2
 ```
 
-Audit focus:
+Main question:
 
 ```text
-Does the contract check the sender form that Arbitrum actually exposes on L2?
+Does the final token balance change match the verified bridge amount?
 ```
+
+If this function mints or releases more than the verified amount, all previous
+checks become irrelevant.
 
 ---
 
-## 8. Address Aliasing Risk
+## 8. Security Risks
 
-In Arbitrum, when an L1 contract sends a message to L2, the L2 side may see an
-aliased version of the L1 contract address.
+### Risk 1: Unauthorized mint/release
 
-Simple idea:
-
-```text
-L1 contract sends message
--> L2 receives message
--> L2 sees aliased L1 contract address
-```
-
-If the finalize function checks the raw L1 gateway address instead of the aliased
-address, authentication may be implemented incorrectly.
-
-Main aliasing invariant:
-
-```text
-If the sender is an L1 contract, L2 auth must check the expected aliased sender.
-```
-
----
-
-## 9. Security Risks
-
-### Risk 1: Direct call without proper auth
-
-If anyone can call `finalizeInboundTransfer(...)`, an attacker may mint or release
-tokens without a real deposit.
+If anyone can call `mint(...)` or `inboundEscrowTransfer(...)`, an attacker may
+create or release tokens without a real bridge message.
 
 Impact:
 
 ```text
-Forged deposit / unbacked token credit.
+Unbacked token minting / unauthorized fund release.
 ```
 
-### Risk 2: Wrong counterpart gateway
+### Risk 2: Amount mismatch
 
-If the function does not verify the expected counterpart gateway, a spoofed
-message may finalize a fake transfer.
-
-Impact:
-
-```text
-Cross-chain auth bypass.
-```
-
-### Risk 3: Address aliasing mistake
-
-If the function checks the raw L1 gateway address instead of the expected aliased
-address, sender validation may be wrong.
-
-Impact:
-
-```text
-Broken Arbitrum sender validation.
-```
-
-### Risk 4: Amount corruption
-
-If decoded `_amount` does not match the amount escrowed on L1, L2 may credit too
-much or too little.
+If `_amount` can be modified after finalization, the recipient may receive more
+or less than the verified bridge amount.
 
 Impact:
 
@@ -243,10 +190,9 @@ Impact:
 Broken token conservation.
 ```
 
-### Risk 5: Recipient substitution
+### Risk 3: Recipient substitution
 
-If `_to` can be changed or decoded incorrectly, funds may be credited to the
-wrong recipient.
+If `_to` can be changed before mint/release, tokens may go to the wrong address.
 
 Impact:
 
@@ -254,10 +200,31 @@ Impact:
 Loss or redirection of user funds.
 ```
 
-### Risk 6: Replay
+### Risk 4: Wrong token credited
 
-If the same message can be finalized twice, L2 may mint/release twice for one L1
-deposit.
+If the wrong token contract is used, the bridge may credit an unintended asset.
+
+Impact:
+
+```text
+Token identity corruption.
+```
+
+### Risk 5: Reentrancy or malicious token behavior
+
+If token transfer/mint logic triggers external calls or hooks, it may affect
+bridge state unexpectedly.
+
+Impact:
+
+```text
+Unexpected state changes or repeated execution.
+```
+
+### Risk 6: Double mint/release
+
+If the same finalized message can trigger this function more than once, the user
+may receive tokens multiple times.
 
 Impact:
 
@@ -267,41 +234,41 @@ Double credit / bridge insolvency.
 
 ---
 
-## 10. Audit Questions
+## 9. Audit Questions
 
-- Can `finalizeInboundTransfer(...)` be called directly?
-- Does it verify the bridge messenger?
-- Does it verify the original L1 sender?
-- Does it verify the expected counterpart gateway?
-- Does it handle Arbitrum address aliasing correctly?
-- Can `_amount`, `_token`, or `_to` be spoofed?
-- Does decoded calldata match the L1 encoding format?
-- Is the L2 token mapping checked?
-- Can the same message be executed twice?
-- Does finalization call mint or escrow release safely?
-- Are there external calls after state changes?
-- Can a malicious token reenter during mint/release logic?
+- Who can call `inboundEscrowTransfer(...)` / `mint(...)`?
+- Is mint/release restricted to the gateway or finalizer?
+- Does `_amount` come directly from verified finalize data?
+- Can `_amount` be changed after finalization?
+- Does `_to` match the recipient from the bridge message?
+- Can `_to` be substituted?
+- Is the credited token the expected L2 token?
+- Can the same message trigger mint/release twice?
+- Are token hooks or callbacks possible?
+- Is reentrancy protection needed?
+- Is L2 minted supply backed by L1 escrow?
 
 ---
 
-## 11. Audit Conclusion
+## 10. Audit Conclusion
 
-`finalizeInboundTransfer(...)` is the destination-chain finalization boundary.
+`inboundEscrowTransfer(...)` / `mint(...)` is the final token credit boundary of
+the deposit flow.
 
 Most important invariant:
 
 ```text
-Only an authentic bridge message may mint or release tokens on L2.
+Minted / released amount on L2 = verified escrowed amount on L1
 ```
 
 Main security question:
 
 ```text
-Is this finalization backed by a real L1 deposit?
+Can this function credit tokens without a valid finalized bridge message?
 ```
 
 Main risk:
 
 ```text
-A spoofed, replayed, or incorrectly decoded message credits value on L2 without valid L1 backing.
+Unauthorized, repeated, or incorrect mint/release breaks bridge accounting.
 ```
