@@ -1,5 +1,6 @@
 # Arbitrum Bridge Flow Local Review
-![Uploading image.png…]()
+![Uploading ChatGPT Image 19 трав. 2026 р., 20_12_37.png…]()
+
 
 
 
