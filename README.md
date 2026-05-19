@@ -42,6 +42,17 @@ Placeholder folder for a future BreakSync-style manual analysis.
 
 Deposit direction:
 
+```mermaid
+flowchart TD
+    A["User"] --> B["L1 Gateway"]
+    B --> C["Lock / Escrow Token"]
+    C --> D["Inbox / Retryable Ticket"]
+    D --> E["L1 -> L2 Message"]
+    E --> F["L2 Gateway"]
+    F --> G["Finalize / Mint Token"]
+    G --> H["L2 Recipient"]
+```
+
 ```text
 User
   |
@@ -62,6 +73,17 @@ L2 Recipient
 ```
 
 Withdrawal direction:
+
+```mermaid
+flowchart TD
+    A["L2 User"] --> B["L2 Gateway"]
+    B --> C["Burn / Lock Token"]
+    C --> D["Outbox Message"]
+    D --> E["L2 -> L1 Proof"]
+    E --> F["L1 Gateway"]
+    F --> G["Finalize / Release Token"]
+    G --> H["L1 Recipient"]
+```
 
 ```text
 L2 User
@@ -103,30 +125,30 @@ I partially used AI as a writing and organization assistant while preparing the 
 ```text
 arbitrum-bridge-flow-local-review/
 |
-├── README.md
+|-- README.md
 |
-├── deposit-flow/
-│   ├── 01-outboundTransfer.md
-│   ├── 02-outboundEscrowTransfer.md
-│   ├── 03-getOutboundCalldata.md
-│   ├── 04-createRetryableTicket.md
-│   ├── 05-AbsInbox-createRetryableTicket.md
-│   ├── 06-finalizeInboundTransfer.md
-│   └── 07-inboundEscrowTransfer-or-mint.md
+|-- deposit-flow/
+|   |-- 01-outboundTransfer.md
+|   |-- 02-outboundEscrowTransfer.md
+|   |-- 03-getOutboundCalldata.md
+|   |-- 04-createRetryableTicket.md
+|   |-- 05-AbsInbox-createRetryableTicket.md
+|   |-- 06-finalizeInboundTransfer.md
+|   `-- 07-inboundEscrowTransfer-or-mint.md
 |
-├── withdrawal-flow/
-│   ├── 01-outboundTransfer-or-withdraw.md
-│   ├── 02-burn-or-lock.md
-│   ├── 03-getOutboundCalldata.md
-│   ├── 04-createOutboundTx.md
-│   ├── 05-finalizeInboundTransfer-or-finalizeWithdrawal.md
-│   └── 06-inboundEscrowTransfer-or-release.md
+|-- withdrawal-flow/
+|   |-- 01-outboundTransfer-or-withdraw.md
+|   |-- 02-burn-or-lock.md
+|   |-- 03-getOutboundCalldata.md
+|   |-- 04-createOutboundTx.md
+|   |-- 05-finalizeInboundTransfer-or-finalizeWithdrawal.md
+|   `-- 06-inboundEscrowTransfer-or-release.md
 |
-├── concepts/
-│   └── address-aliasing.md
+|-- concepts/
+|   `-- address-aliasing.md
 |
-└── breaksync/
-    └── README.md
+`-- breaksync/
+    `-- README.md
 ```
 
 ---
