@@ -1,348 +1,150 @@
 # Function Review: outboundTransfer(...)
 
-## 1. Function Code
+## Function Code
 
 ```solidity
-// Paste the exact outboundTransfer(...) source code here.
-//
-// Example structure:
-//
-// function outboundTransfer(
-//     address _l1Token,
-//     address _to,
-//     uint256 _amount,
-//     uint256 _maxGas,
-//     uint256 _gasPriceBid,
-//     bytes calldata _data
-// ) external payable returns (bytes memory) {
-//     ...
-// }
-```
+// Paste the full outboundTransfer(...) function code here.
+// Use the exact code from the contract version you are reviewing.
 
-Note:
-
-```text
-The exact function body should be copied from the reviewed contract version.
-Different gateway implementations may have different parameters and internal calls.
+function outboundTransfer(
+    // paste exact parameters here
+) external payable returns (bytes memory) {
+    // paste exact function body here
+}
 ```
 
 ---
 
-## 2. Function Purpose
+## Function Explanation
 
-`outboundTransfer(...)` starts the L1 -> L2 token deposit.
+`outboundTransfer(...)` is the main L1 entry point for starting a deposit into Arbitrum.
 
-Its role is to connect:
+The user calls this function to bridge tokens from L1 to L2.
 
-- user input
-- token selection
-- recipient selection
-- amount accounting
-- L1 escrow / lock logic
-- calldata construction
-- retryable ticket creation
-- later L2 finalization
+At a high level, this function usually:
 
-In simple terms:
+- receives deposit parameters from the user
+- selects the correct token/gateway path
+- moves tokens into L1 escrow
+- builds calldata for the L2 message
+- creates the retryable ticket that will later execute on L2
+
+The main security idea is:
 
 ```text
-The user calls outboundTransfer(...) on L1 to begin bridging tokens to L2.
+The L2 message must represent what actually happened on L1.
 ```
 
-This function is security-critical because it turns a local L1 token action into
-a cross-chain message that will later credit value on L2.
+If the function creates an L2 message using wrong or unverified values, the destination chain may credit tokens that are not correctly backed by source-chain escrow.
 
 ---
 
-## 3. Critical Parameters
+## Important Logic Notes
 
-Common critical parameters:
+### Token / Gateway Selection
 
-- `l1Token` / `_l1Token`
-- `to` / `_to`
-- `amount` / `_amount`
-- `data` / `_data`
-- gas limit
-- max gas / max submission cost
-- gas price bid / max fee per gas
-- refund addresses
+If the function selects or resolves an L2 token/gateway, this part defines which token or gateway will be used on the destination chain.
 
-Parameter meaning:
+This matters because the bridge must preserve token identity across chains.
 
-- `l1Token`: source-chain token being deposited
-- `to`: destination-chain recipient
-- `amount`: requested deposit amount
-- `data`: extra encoded parameters used by the bridge/gateway
-- gas parameters: execution budget for the L2 retryable ticket
-- refund addresses: addresses receiving unused retryable ticket funds
+```text
+L1 token -> correct L2 token / gateway
+```
+
+If this mapping is wrong, the bridge may lock one asset on L1 but credit another asset on L2.
 
 ---
 
-## 4. Trusted / Untrusted Input
+### Escrow Step
 
-Trusted or semi-trusted:
+If the function calls something like:
 
-- configured gateway address
-- configured inbox / bridge address
-- validated token mapping
-- expected counterpart gateway
-
-Untrusted:
-
-- user-supplied `amount`
-- user-supplied `to`
-- user-supplied `data`
-- user-controlled gas values
-- user-controlled refund addresses
-- token contract behavior
-
-Important audit idea:
-
-```text
-User input is not the same as economic reality.
+```solidity
+outboundEscrowTransfer(...);
 ```
 
-The user can request to deposit `amount`, but the bridge must make sure the
-source-chain accounting really supports the amount that will be credited on L2.
+this is the accounting boundary.
 
----
+This is where the bridge should actually receive or lock the user's L1 tokens.
 
-## 5. Internal Calls
-
-Typical internal call structure:
+Important distinction:
 
 ```text
-outboundTransfer(...)
-├── outboundEscrowTransfer(...)
-├── getOutboundCalldata(...)
-└── createRetryableTicket(...)
-    └── AbsInbox._createRetryableTicket(...)
+amount = what the user requested to send
+actualReceived = what the bridge actually received
 ```
 
-### 5.1 outboundEscrowTransfer(...)
+For standard ERC20 tokens, these values usually match.
 
-Purpose:
+For fee-on-transfer or non-standard tokens, they may differ.
 
-```text
-Moves or locks the user's L1 tokens into bridge escrow.
-```
-
-Security meaning:
-
-```text
-This is the accounting boundary.
-```
-
-The bridge must know how many tokens were actually received before it sends a
-message that credits value on L2.
-
-### 5.2 getOutboundCalldata(...)
-
-Purpose:
-
-```text
-Builds the calldata / payload that will be executed on L2.
-```
-
-Security meaning:
-
-```text
-This is the message construction boundary.
-```
-
-The encoded `amount`, `token`, and `recipient` must match the real deposit.
-
-### 5.3 createRetryableTicket(...)
-
-Purpose:
-
-```text
-Creates the L1 -> L2 retryable ticket.
-```
-
-Security meaning:
-
-```text
-This is the cross-chain message boundary.
-```
-
-The retryable ticket must target the correct L2 gateway and carry correct
-calldata.
-
----
-
-## 6. Invariants
-
-Main deposit invariant:
-
-```text
-L1 locked / escrowed amount = L2 minted / released amount
-```
-
-Function-level invariants:
-
-- The selected L1 token must be the intended token.
-- The L1 token must map to the correct L2 token.
-- The recipient encoded for L2 must equal the intended recipient.
-- Tokens must be escrowed / locked before L2 credit is finalized.
-- The amount encoded for L2 must match the amount actually escrowed / received.
-- The retryable ticket must target the correct L2 gateway.
-- The deposit message must not be executable twice.
-
----
-
-## 7. Amount Consistency
-
-The amount should be tracked through the whole function and downstream flow:
-
-```text
-input amount
--> actual received / escrowed amount
--> encoded amount
--> decoded amount on L2
--> minted / released amount
-```
-
-For non-standard tokens, the reviewed code should not blindly trust the
-user-supplied `amount`.
-
-Correct accounting formula:
+The safest accounting idea is:
 
 ```text
 actualReceived = balanceAfter - balanceBefore
 ```
 
-Example risk:
+If the bridge receives less than the amount later encoded for L2, the bridge can credit unbacked value on L2.
 
-```text
-User requested deposit: 100
-Bridge actually received: 98
-Amount encoded for L2: 100
-L2 credited amount: 100
+---
+
+### Calldata Construction
+
+If the function builds calldata using something like:
+
+```solidity
+getOutboundCalldata(...);
 ```
 
-Broken invariant:
+this is the message construction boundary.
+
+This step decides which values will be sent to L2.
+
+Important values:
+
+- token
+- recipient
+- amount
+- extra data
+
+Calldata does not prove correctness by itself.
+
+It only stores the values that the contract decided to encode.
+
+So the important point is:
 
 ```text
-L1 escrowed amount < L2 minted / released amount
+The values must be correct before they are encoded.
 ```
 
 ---
 
-## 8. Security Risks
+### Retryable Ticket Creation
 
-### Risk 1: Amount mismatch
+If the function calls something like:
 
-If the function uses the user-provided `amount` instead of the actual amount
-received by escrow, L2 may credit more value than L1 received.
-
-Impact:
-
-```text
-Unbacked L2 tokens or bridge accounting insolvency.
+```solidity
+createRetryableTicket(...);
 ```
 
-### Risk 2: Wrong token mapping
+this is the L1 -> L2 message boundary.
 
-If the L1 token resolves to the wrong L2 token or wrong gateway, the user may be
-credited with an unintended asset.
+This step sends the prepared calldata to Arbitrum for L2 execution.
 
-Impact:
+The retryable ticket should target the correct L2 gateway and carry the correct calldata.
 
-```text
-Token identity corruption.
-```
-
-### Risk 3: Recipient substitution
-
-If the recipient is changed before calldata creation or during decoding on L2,
-the deposit may be credited to the wrong address.
-
-Impact:
-
-```text
-Loss or redirection of user funds.
-```
-
-### Risk 4: Unsafe user-controlled data
-
-If `_data` can override critical values such as `amount`, `token`, `recipient`,
-or refund addresses in an unsafe way, calldata may not represent the real
-deposit.
-
-Impact:
-
-```text
-Calldata corruption and invalid L2 finalization.
-```
-
-### Risk 5: Retryable ticket failure or griefing
-
-If gas parameters are too low or refund logic is unsafe, the retryable ticket may
-fail or become difficult to execute.
-
-Impact:
-
-```text
-Delayed or stuck deposit.
-```
-
-### Risk 6: Wrong L2 target
-
-If the retryable ticket targets the wrong L2 contract, the message may execute
-unexpected logic or fail permanently.
-
-Impact:
-
-```text
-Invalid cross-chain execution.
-```
+A retryable ticket can be valid at the messaging layer but still contain wrong bridge data.
 
 ---
 
-## 9. Audit Questions
+## Invariants
 
-- Who can call `outboundTransfer(...)`?
-- Which parameters are controlled by the user?
-- Is `l1Token` validated?
-- How is the correct L2 token / gateway selected?
-- Does escrow happen before calldata is created?
-- Does the function encode nominal `amount` or `actualReceived`?
-- Can fee-on-transfer tokens break accounting?
-- Can `_data` override `amount`, `token`, or `recipient`?
-- Can the recipient be substituted before finalization?
-- Does the retryable ticket target the expected L2 gateway?
-- Who controls refund addresses?
-- Can bad gas parameters cause a stuck deposit?
-- Is replay protection handled by the bridge / message system?
-- Can the same deposit be finalized twice?
-
----
-
-## 10. Audit Conclusion
-
-`outboundTransfer(...)` is the main L1 deposit entry point.
-
-The function is critical because it connects user-controlled input with the
-bridge accounting flow.
-
-Main security boundary:
-
-```text
-User input -> L1 escrow / accounting -> L2 message
-```
-
-Most important invariant:
-
-```text
-The amount credited on L2 must be backed by the amount escrowed on L1.
-```
-
-Most important audit question:
-
-```text
-Does the message sent to L2 represent what actually happened on L1?
-```
-
-If the function builds calldata from unverified user input, the destination chain
-may credit value that is not properly backed on the source chain.
+- L1 escrowed amount must equal L2 minted / released amount.
+- The selected L1 token must be the intended token.
+- The selected L1 token must map to the correct L2 token.
+- The L2 recipient must match the intended recipient.
+- Tokens must be escrowed / locked on L1 before L2 credit is finalized.
+- The amount encoded for L2 must match the real escrowed / received amount.
+- The calldata must match what the L2 finalize function expects.
+- The retryable ticket must target the correct L2 gateway.
+- The deposit message must not be finalized twice.

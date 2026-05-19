@@ -1,75 +1,152 @@
 # Arbitrum Bridge Flow Local Review
-<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/42fed5d0-c626-4e97-8d7b-213140d17a87" />
 
+This repository contains my local study and security-oriented review of an Arbitrum-style bridge flow.
 
-
-This repository contains my local security review and flow analysis of an Arbitrum-style token bridge.
-
-The goal of this project is to understand how the bridge deposit and withdrawal flows work, how tokens are accounted for across L1 and L2, and where important security invariants can break.
+The goal of this repository is to document how I studied the bridge architecture, deposit flow, withdrawal flow, and important function-level security concepts.
 
 This is an educational portfolio project. It is not an official audit of Arbitrum or any production deployment.
 
-## What This Repository Covers
+---
 
-This repository focuses on:
+## Repository Overview
 
-- Deposit flow analysis
-- Withdrawal flow analysis
-- Function-by-function review
-- Internal calls inside main bridge functions
-- Token accounting
-- Amount consistency
-- Token mapping
-- Recipient preservation
-- Calldata and message passing
-- Cross-chain authentication
-- Replay protection
-- Arbitrum address aliasing
-
-## Review Methodology
-
-The main methodology used in this review is:
+This repository is organized into several parts:
 
 ```text
-Understand the flow -> Define invariants -> Search for violations
-For every important function, I analyze:
+deposit-flow/
+```
 
-What the function does
-Where it sits in the bridge flow
-Which internal functions it calls
-Which parameters are critical
-Which inputs are user-controlled
-What invariants must hold
-What security risks may appear
-What audit questions should be asked
-Main Deposit Invariant
-For deposits from L1 to L2:
+Function-by-function notes for the L1 -> L2 deposit flow.
 
-L1 locked / escrowed amount = L2 minted / released amount
-Main Withdrawal Invariant
-For withdrawals from L2 to L1:
+```text
+withdrawal-flow/
+```
 
-L2 burned / locked amount = L1 released amount
-Repository Structure
-The repository is organized by flow and by function.
+Function-by-function notes for the L2 -> L1 withdrawal flow.
 
-Deposit flow files cover the L1 -> L2 path.
+```text
+concepts/
+```
 
-Withdrawal flow files cover the L2 -> L1 path.
+Separate explanations of important bridge concepts, such as Arbitrum address aliasing.
 
-Concept files explain important bridge-specific ideas such as Arbitrum address aliasing.
+```text
+breaksync/
+```
 
-Purpose
-The purpose of this repository is to show practical audit thinking for bridge systems.
+Placeholder folder for a future BreakSync-style manual analysis.
 
-Instead of only reading individual functions, the review follows the full token and message flow across chains and checks whether the bridge preserves:
+---
 
-amount
-token identity
-recipient
-message authenticity
-replay protection
-accounting correctness
-The main security question is:
+## Bridge Flow Overview
 
-Can destination-chain accounting diverge from source-chain reality?
+Deposit direction:
+
+```text
+User
+  |
+  v
+L1 Gateway
+  |
+  | lock / escrow token
+  v
+Inbox / Retryable Ticket
+  |
+  | L1 -> L2 message
+  v
+L2 Gateway
+  |
+  | finalize / mint token
+  v
+L2 Recipient
+```
+
+Withdrawal direction:
+
+```text
+L2 User
+  |
+  v
+L2 Gateway
+  |
+  | burn / lock token
+  v
+Outbox Message
+  |
+  | L2 -> L1 proof
+  v
+L1 Gateway
+  |
+  | finalize / release token
+  v
+L1 Recipient
+```
+
+---
+
+## Study Process
+
+I studied the bridge in several stages:
+
+1. First, I studied the high-level architecture of the bridge.
+2. Then I traced the full deposit flow.
+3. Then I traced the full withdrawal flow.
+4. After that, I reviewed important functions one by one.
+5. Finally, I organized the notes into this repository.
+
+I partially used AI as a writing and organization assistant while preparing the notes, but the goal of this repository is to show my own learning process, flow tracing, and security reasoning.
+
+---
+
+## Repository Structure
+
+```text
+arbitrum-bridge-flow-local-review/
+|
+├── README.md
+|
+├── deposit-flow/
+│   ├── 01-outboundTransfer.md
+│   ├── 02-outboundEscrowTransfer.md
+│   ├── 03-getOutboundCalldata.md
+│   ├── 04-createRetryableTicket.md
+│   ├── 05-AbsInbox-createRetryableTicket.md
+│   ├── 06-finalizeInboundTransfer.md
+│   └── 07-inboundEscrowTransfer-or-mint.md
+|
+├── withdrawal-flow/
+│   ├── 01-outboundTransfer-or-withdraw.md
+│   ├── 02-burn-or-lock.md
+│   ├── 03-getOutboundCalldata.md
+│   ├── 04-createOutboundTx.md
+│   ├── 05-finalizeInboundTransfer-or-finalizeWithdrawal.md
+│   └── 06-inboundEscrowTransfer-or-release.md
+|
+├── concepts/
+│   └── address-aliasing.md
+|
+└── breaksync/
+    └── README.md
+```
+
+---
+
+## Current Scope
+
+The current focus of the repository is:
+
+- bridge flow overview
+- deposit flow notes
+- withdrawal flow notes
+- function-level explanations
+- important bridge concepts
+
+The `breaksync/` folder is reserved for a future manual BreakSync-style analysis, where each function will be reviewed separately in more depth.
+
+---
+
+## Disclaimer
+
+This repository is for educational and portfolio purposes only.
+
+It is not an official audit, and it should not be treated as a security assessment of any production deployment.

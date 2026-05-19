@@ -1,286 +1,137 @@
 # Function Review: outboundEscrowTransfer(...)
 
-## 1. Function Code
+## Function Code
 
 ```solidity
-// Paste the exact outboundEscrowTransfer(...) source code here.
-//
-// Example structure:
-//
-// function outboundEscrowTransfer(
-//     address _l1Token,
-//     address _from,
-//     uint256 _amount
-// ) internal returns (uint256) {
-//     ...
-// }
-```
+// Paste the full outboundEscrowTransfer(...) function code here.
+// Use the exact code from the contract version you are reviewing.
 
-Note:
-
-```text
-The exact function body should be copied from the reviewed contract version.
-Different gateway implementations may implement escrow logic differently.
+function outboundEscrowTransfer(
+    // paste exact parameters here
+) internal returns (uint256) {
+    // paste exact function body here
+}
 ```
 
 ---
 
-## 2. Function Purpose
+## Function Explanation
 
-`outboundEscrowTransfer(...)` is the deposit-side escrow step.
+`outboundEscrowTransfer(...)` is the L1 escrow step in the deposit flow.
 
 It is usually called inside `outboundTransfer(...)`.
 
-Its purpose is to move or lock the user's L1 tokens into the bridge escrow before
-the L2 deposit message is finalized.
+This function is responsible for moving or locking the user's tokens on L1 before the bridge creates or finalizes the L2 credit.
 
-In simple terms:
+At a high level, this function usually:
+
+- receives the token address
+- receives the sender address
+- receives the requested amount
+- transfers tokens from the user to the bridge/escrow
+- returns or defines the amount that should be used for downstream accounting
+
+The main security idea is:
 
 ```text
-This function is where the bridge should actually receive the user's tokens on L1.
+The bridge must credit L2 only for the amount that was actually received or escrowed on L1.
 ```
 
-This function is critical because it connects the user's requested deposit amount
-with the bridge's real source-chain token balance.
+If this function does not correctly handle the token transfer, the entire deposit accounting can become wrong.
 
 ---
 
-## 3. Critical Parameters
+## Important Logic Notes
 
-Common critical parameters:
+### Token Transfer / Escrow
 
-- `l1Token` / `_l1Token`
-- `from` / `_from`
-- `amount` / `_amount`
+If the function performs a token transfer using something like:
 
-Parameter meaning:
+```solidity
+transferFrom(...);
+```
 
-- `l1Token`: token being escrowed on L1
-- `from`: address sending tokens into escrow
-- `amount`: requested amount to move from the user into the bridge
+or:
+
+```solidity
+safeTransferFrom(...);
+```
+
+this is the core escrow operation.
+
+This is where the bridge should actually receive the user's L1 tokens.
+
+If this step fails or behaves unexpectedly, the bridge must not continue as if the deposit succeeded.
 
 ---
 
-## 4. Trusted / Untrusted Input
+### Actual Received Amount
 
-Trusted or semi-trusted:
-
-- gateway escrow address
-- validated token mapping
-- internal caller, if function is internal
-- configured token address, if validated before call
-
-Untrusted:
-
-- user-supplied `amount`
-- token contract behavior
-- ERC20 return behavior
-- fee-on-transfer logic
-- rebasing or balance-changing behavior
-- malicious token callbacks/hooks
-
-Important audit idea:
+The most important point in this function is the difference between `amount` and `actualReceived`.
 
 ```text
-The bridge should care about how many tokens it actually received, not only how many tokens the user requested to send.
-```
-
----
-
-## 5. Called Inside
-
-Typical call structure:
-
-```text
-outboundTransfer(...)
-└── outboundEscrowTransfer(...)
-```
-
-`outboundEscrowTransfer(...)` is not usually the full deposit flow by itself.
-
-It is an internal accounting step inside the larger `outboundTransfer(...)`
-deposit process.
-
-Security meaning:
-
-```text
-This is the accounting boundary of the deposit flow.
-```
-
-If this step is wrong, every downstream step can inherit the wrong amount.
-
----
-
-## 6. Invariants
-
-Main escrow invariant:
-
-```text
-Amount actually received by L1 escrow = amount credited on L2
-```
-
-Function-level invariants:
-
-- Tokens must move from the user to the bridge escrow.
-- Escrow must happen before L2 mint/release.
-- The bridge must not credit more than it actually received.
-- For non-standard tokens, accounting should use actual received amount.
-- Failed token transfer must revert the deposit.
-- The token address must be the expected L1 token.
-
----
-
-## 7. Amount Consistency
-
-This function is the most important place to check `actualReceived`.
-
-Correct accounting pattern:
-
-```text
-balanceBefore = token.balanceOf(address(this))
-transferFrom(user, address(this), amount)
-balanceAfter = token.balanceOf(address(this))
-
-actualReceived = balanceAfter - balanceBefore
-```
-
-Why this matters:
-
-```text
-amount = what the user asked to transfer
+amount = what the user requested to transfer
 actualReceived = what the bridge actually received
 ```
 
-If the bridge uses `amount` but receives less, accounting can break.
+For standard ERC20 tokens, these values usually match.
+
+For fee-on-transfer tokens, they may differ.
 
 Example:
 
 ```text
-User requested deposit: 100
-Token fee: 2
-Bridge actually received: 98
-L2 credited amount: 100
+User sends: 100
+Bridge receives: 98
+Fee taken by token: 2
 ```
 
-Broken invariant:
+The safest accounting pattern is:
 
 ```text
-L1 escrowed amount < L2 minted / released amount
+actualReceived = balanceAfter - balanceBefore
 ```
+
+If the bridge later credits L2 using `amount` instead of `actualReceived`, L2 may receive more value than L1 escrow actually holds.
 
 ---
 
-## 8. Security Risks
+### Non-Standard Token Behavior
 
-### Risk 1: Fee-on-transfer amount mismatch
+Some tokens do not behave like normal ERC20 tokens.
 
-A fee-on-transfer token may deduct a fee during transfer.
+Examples:
 
-Example:
+- fee-on-transfer tokens
+- false-return tokens
+- rebasing tokens
+- pausable or blacklistable tokens
+- malicious tokens with callbacks/hooks
 
-```text
-User sends 100
-Bridge receives 98
-2 tokens are taken as fee
-```
-
-If the bridge still credits 100 on L2, the bridge creates more L2 value than it
-received on L1.
-
-Impact:
-
-```text
-Unbacked L2 tokens / accounting insolvency.
-```
-
-### Risk 2: False-return token
-
-Some ERC20 tokens return `false` instead of reverting when transfer fails.
-
-If the bridge does not use safe transfer logic, it may continue as if the
-transfer succeeded.
-
-Impact:
-
-```text
-L2 credit without real L1 escrow.
-```
-
-### Risk 3: Non-standard token behavior
-
-Some tokens may rebase, take fees, blacklist, pause, or change balances in
-unexpected ways.
-
-Impact:
-
-```text
-Escrow accounting may not match bridge assumptions.
-```
-
-### Risk 4: Reentrancy through token callbacks
-
-A malicious token may try to reenter bridge logic during transfer.
-
-Impact:
-
-```text
-Unexpected state changes or repeated flow execution.
-```
-
-### Risk 5: Wrong token address
-
-If the escrow function receives or uses an incorrect token address, the bridge
-may escrow one asset but credit another.
-
-Impact:
-
-```text
-Token mapping/accounting corruption.
-```
+This matters because the bridge may assume that a token transfer succeeded and moved exactly `amount`, but the real balance change may be different.
 
 ---
 
-## 9. Audit Questions
+### Return Value
 
-- Is `outboundEscrowTransfer(...)` internal or externally callable?
-- Who can trigger this function?
-- Is the token address validated before transfer?
-- Does the function use `safeTransferFrom` or equivalent?
-- Does it check the actual received amount?
-- Does it calculate `actualReceived = balanceAfter - balanceBefore`?
-- Does downstream calldata use `amount` or `actualReceived`?
-- What happens if the token charges a transfer fee?
-- What happens if the token returns `false`?
-- What happens if the token is rebasing?
-- Can a malicious token reenter bridge logic?
-- Does the deposit revert if escrow transfer fails?
-- Can L2 credit happen without successful L1 escrow?
+If the function returns an amount, that returned value is important.
+
+It may be used later for:
+
+- calldata construction
+- L2 mint/release amount
+- accounting updates
+
+The returned value should represent the real escrowed/received amount, not only the user-requested amount.
 
 ---
 
-## 10. Audit Conclusion
+## Invariants
 
-`outboundEscrowTransfer(...)` is the deposit accounting boundary.
-
-The main security question is:
-
-```text
-How many tokens did the bridge actually receive?
-```
-
-Most important invariant:
-
-```text
-Actual L1 escrowed amount = L2 credited amount
-```
-
-If this function trusts the requested `amount` instead of measuring or safely
-verifying the actual received amount, the bridge may mint or release unbacked
-tokens on L2.
-
-Main risk:
-
-```text
-User-supplied amount is treated as real escrowed value.
-```
-
+- Tokens must actually move from the user to the L1 bridge/escrow.
+- Failed token transfer must stop the deposit flow.
+- L1 escrowed amount must equal L2 minted / released amount.
+- The amount used downstream should match the real received / escrowed amount.
+- For fee-on-transfer or non-standard tokens, accounting should not blindly trust user-supplied `amount`.
+- The token being escrowed must be the intended L1 token.
+- L2 credit must not happen without successful L1 escrow.
