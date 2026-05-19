@@ -1,274 +1,83 @@
 # Function Review: inboundEscrowTransfer(...) / mint(...)
 
-## 1. Function Code
+## Function Code
 
 ```solidity
-// Paste the exact inboundEscrowTransfer(...) or mint(...) source code here.
-//
-// Example structure:
-//
-// function inboundEscrowTransfer(
-//     address _token,
-//     address _to,
-//     uint256 _amount
-// ) internal {
-//     ...
-// }
-//
+// Paste the full inboundEscrowTransfer(...) or mint(...) function code here.
+// Use the exact code from the contract version you are reviewing.
+
+function inboundEscrowTransfer(
+    // paste exact parameters here
+) internal {
+    // paste exact function body here
+}
+
 // or
-//
-// function mint(
-//     address _to,
-//     uint256 _amount
-// ) external {
-//     ...
-// }
-```
 
-Note:
-
-```text
-The exact function body should be copied from the reviewed contract version.
-Some bridge implementations release escrowed tokens, while others mint a representation token.
+function mint(
+    // paste exact parameters here
+) external {
+    // paste exact function body here
+}
 ```
 
 ---
 
-## 2. Function Purpose
+## Function Explanation
 
-`inboundEscrowTransfer(...)` / `mint(...)` is the final token-crediting step on
-the destination chain.
+`inboundEscrowTransfer(...)` / `mint(...)` is the final token credit step in the deposit flow.
 
-For the deposit flow, this usually happens on L2 after
-`finalizeInboundTransfer(...)` verifies and processes the bridge message.
+After the bridge message is finalized, this function releases or mints tokens to the L2 recipient.
 
-In simple terms:
+Main idea:
 
 ```text
-This is the function that actually gives the user tokens on L2.
+The final token credit must match the verified bridge message.
 ```
 
-It is critical because this is where verified bridge message data turns into a
-real token balance change.
+This is where bridge accounting becomes an actual user token balance.
 
 ---
 
-## 3. Critical Parameters
+## Important Logic Notes
 
-Common critical parameters:
+### Authorized Caller
 
-- `_token`
-- `_to`
-- `_amount`
-- token minter role
-- gateway address
-- bridge finalizer context
+Mint or release logic should only be callable by the trusted gateway/finalizer.
 
-Parameter meaning:
-
-- `_token`: token being released or minted
-- `_to`: recipient receiving tokens on L2
-- `_amount`: amount to release or mint
-- token minter role: address allowed to mint representation tokens
-- gateway address: contract allowed to trigger token credit
-- finalizer context: verified message data from `finalizeInboundTransfer(...)`
+If this function is callable by an unauthorized account, tokens may be minted or released without a real bridge message.
 
 ---
 
-## 4. Trusted / Untrusted Input
+### Amount Used for Credit
 
-Trusted only if verified:
+The credited amount should come from verified finalization data.
 
-- verified finalize data
-- expected gateway/finalizer
-- configured token mapping
-- authorized minter role
-
-Untrusted:
-
-- direct external calls
-- unverified `_to`
-- unverified `_amount`
-- arbitrary token contracts
-- malicious token hooks/callbacks
-- unauthorized minter callers
-
-Important audit idea:
-
-```text
-Mint/release must only happen after valid bridge finalization.
-```
-
-This function should not independently trust user-provided parameters.
+It should not be independently controlled by a user at this stage.
 
 ---
 
-## 5. Called After
+### Recipient
 
-Typical deposit execution path:
+The recipient must be the same recipient that was encoded in the authenticated bridge message.
 
-```text
-finalizeInboundTransfer(...)
-└── inboundEscrowTransfer(...) / mint(...)
-```
-
-Security meaning:
-
-```text
-This is the token credit boundary.
-```
-
-This is the final point where bridge accounting becomes an actual token balance.
+If the recipient can be changed here, funds can be redirected.
 
 ---
 
-## 6. Invariants
+### Token Behavior
 
-Main credit invariant:
+If this step transfers tokens instead of minting, token behavior may matter.
 
-```text
-L2 minted / released amount = verified L1 escrowed amount
-```
+If this step mints representation tokens, minter permissions and supply accounting matter.
 
-Function-level invariants:
+---
 
+## Invariants
+
+- Minted / released amount on L2 must equal the verified L1 escrowed amount.
 - Only the authorized gateway/finalizer may mint or release tokens.
-- `_amount` must come from verified bridge finalization data.
-- `_to` must be the intended recipient from the bridge message.
-- Minted/released token must match the expected L2 token.
+- The recipient must match the finalized bridge message.
+- The credited token must be the expected L2 token.
 - L2 token supply must remain backed by L1 escrow.
-- The same finalized message must not cause multiple mint/release actions.
-
----
-
-## 7. Accounting Boundary
-
-This function is the final accounting step of the deposit flow.
-
-Trace:
-
-```text
-L1 escrowed amount
--> encoded amount
--> decoded amount
--> verified finalized amount
--> minted / released amount on L2
-```
-
-Main question:
-
-```text
-Does the final token balance change match the verified bridge amount?
-```
-
-If this function mints or releases more than the verified amount, all previous
-checks become irrelevant.
-
----
-
-## 8. Security Risks
-
-### Risk 1: Unauthorized mint/release
-
-If anyone can call `mint(...)` or `inboundEscrowTransfer(...)`, an attacker may
-create or release tokens without a real bridge message.
-
-Impact:
-
-```text
-Unbacked token minting / unauthorized fund release.
-```
-
-### Risk 2: Amount mismatch
-
-If `_amount` can be modified after finalization, the recipient may receive more
-or less than the verified bridge amount.
-
-Impact:
-
-```text
-Broken token conservation.
-```
-
-### Risk 3: Recipient substitution
-
-If `_to` can be changed before mint/release, tokens may go to the wrong address.
-
-Impact:
-
-```text
-Loss or redirection of user funds.
-```
-
-### Risk 4: Wrong token credited
-
-If the wrong token contract is used, the bridge may credit an unintended asset.
-
-Impact:
-
-```text
-Token identity corruption.
-```
-
-### Risk 5: Reentrancy or malicious token behavior
-
-If token transfer/mint logic triggers external calls or hooks, it may affect
-bridge state unexpectedly.
-
-Impact:
-
-```text
-Unexpected state changes or repeated execution.
-```
-
-### Risk 6: Double mint/release
-
-If the same finalized message can trigger this function more than once, the user
-may receive tokens multiple times.
-
-Impact:
-
-```text
-Double credit / bridge insolvency.
-```
-
----
-
-## 9. Audit Questions
-
-- Who can call `inboundEscrowTransfer(...)` / `mint(...)`?
-- Is mint/release restricted to the gateway or finalizer?
-- Does `_amount` come directly from verified finalize data?
-- Can `_amount` be changed after finalization?
-- Does `_to` match the recipient from the bridge message?
-- Can `_to` be substituted?
-- Is the credited token the expected L2 token?
-- Can the same message trigger mint/release twice?
-- Are token hooks or callbacks possible?
-- Is reentrancy protection needed?
-- Is L2 minted supply backed by L1 escrow?
-
----
-
-## 10. Audit Conclusion
-
-`inboundEscrowTransfer(...)` / `mint(...)` is the final token credit boundary of
-the deposit flow.
-
-Most important invariant:
-
-```text
-Minted / released amount on L2 = verified escrowed amount on L1
-```
-
-Main security question:
-
-```text
-Can this function credit tokens without a valid finalized bridge message?
-```
-
-Main risk:
-
-```text
-Unauthorized, repeated, or incorrect mint/release breaks bridge accounting.
-```
+- The same finalized message must not trigger mint/release twice.
