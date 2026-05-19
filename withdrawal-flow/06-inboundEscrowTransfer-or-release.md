@@ -3,13 +3,13 @@
 ## Function Code
 
 ```solidity
-// Paste the full inboundEscrowTransfer(...) or release(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function inboundEscrowTransfer(
-    // paste exact parameters here
-) internal {
-    // paste exact function body here
+    address _l1Token,
+    address _dest,
+    uint256 _amount
+) internal virtual {
+    // this method is virtual since different subclasses can handle escrow differently
+    IERC20(_l1Token).safeTransfer(_dest, _amount);
 }
 ```
 

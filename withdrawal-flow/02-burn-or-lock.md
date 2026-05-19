@@ -3,13 +3,18 @@
 ## Function Code
 
 ```solidity
-// Paste the full burn(...) or lock(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
-function burn(
-    // paste exact parameters here
-) internal {
-    // paste exact function body here
+function outboundEscrowTransfer(
+    address _l2Token,
+    address _from,
+    uint256 _amount
+) internal virtual returns (uint256 amountBurnt) {
+    // this method is virtual since different subclasses can handle escrow differently
+    // user funds are escrowed on the gateway using this function
+    // burns L2 tokens in order to release escrowed L1 tokens
+    IArbToken(_l2Token).bridgeBurn(_from, _amount);
+    // by default we assume that the amount we send to bridgeBurn is the amount burnt
+    // this might not be the case for every token
+    return _amount;
 }
 ```
 

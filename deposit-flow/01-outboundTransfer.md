@@ -3,13 +3,16 @@
 ## Function Code
 
 ```solidity
-// Paste the full outboundTransfer(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function outboundTransfer(
-    // paste exact parameters here
-) external payable returns (bytes memory) {
-    // paste exact function body here
+    address _l1Token,
+    address _to,
+    uint256 _amount,
+    uint256 _maxGas,
+    uint256 _gasPriceBid,
+    bytes calldata _data
+) public payable override returns (bytes memory res) {
+    return
+        outboundTransferCustomRefund(_l1Token, _to, _to, _amount, _maxGas, _gasPriceBid, _data);
 }
 ```
 

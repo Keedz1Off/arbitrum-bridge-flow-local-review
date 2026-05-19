@@ -3,13 +3,24 @@
 ## Function Code
 
 ```solidity
-// Paste the full createOutboundTx(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function createOutboundTx(
-    // paste exact parameters here
-) internal returns (uint256) {
-    // paste exact function body here
+    address _from,
+    uint256, /* _tokenAmount */
+    bytes memory _outboundCalldata
+) internal virtual returns (uint256) {
+    // We make this function virtual since outboundTransfer logic is the same for many gateways
+    // but sometimes (ie weth) you construct the outgoing message differently.
+
+    // exitNum incremented after being included in _outboundCalldata
+    exitNum++;
+    return
+        sendTxToL1(
+            // default to sending no callvalue to the L1
+            0,
+            _from,
+            counterpartGateway,
+            _outboundCalldata
+        );
 }
 ```
 

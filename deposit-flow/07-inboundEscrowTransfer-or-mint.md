@@ -3,21 +3,13 @@
 ## Function Code
 
 ```solidity
-// Paste the full inboundEscrowTransfer(...) or mint(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function inboundEscrowTransfer(
-    // paste exact parameters here
-) internal {
-    // paste exact function body here
-}
-
-// or
-
-function mint(
-    // paste exact parameters here
-) external {
-    // paste exact function body here
+    address _l2Address,
+    address _dest,
+    uint256 _amount
+) internal virtual {
+    // this method is virtual since different subclasses can handle escrow differently
+    IArbToken(_l2Address).bridgeMint(_dest, _amount);
 }
 ```
 

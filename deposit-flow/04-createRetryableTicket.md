@@ -3,13 +3,27 @@
 ## Function Code
 
 ```solidity
-// Paste the full createRetryableTicket(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function createRetryableTicket(
-    // paste exact parameters here
-) external payable returns (uint256) {
-    // paste exact function body here
+    address to,
+    uint256 l2CallValue,
+    uint256 maxSubmissionCost,
+    address excessFeeRefundAddress,
+    address callValueRefundAddress,
+    uint256 gasLimit,
+    uint256 maxFeePerGas,
+    bytes calldata data
+) external payable whenNotPaused onlyAllowed returns (uint256) {
+    return _createRetryableTicket(
+        to,
+        l2CallValue,
+        maxSubmissionCost,
+        excessFeeRefundAddress,
+        callValueRefundAddress,
+        gasLimit,
+        maxFeePerGas,
+        msg.value,
+        data
+    );
 }
 ```
 

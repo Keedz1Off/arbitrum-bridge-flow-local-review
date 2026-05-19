@@ -3,13 +3,23 @@
 ## Function Code
 
 ```solidity
-// Paste the full getOutboundCalldata(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function getOutboundCalldata(
-    // paste exact parameters here
-) public view returns (bytes memory) {
-    // paste exact function body here
+    address _token,
+    address _from,
+    address _to,
+    uint256 _amount,
+    bytes memory _data
+) public view override returns (bytes memory outboundCalldata) {
+    outboundCalldata = abi.encodeWithSelector(
+        ITokenGateway.finalizeInboundTransfer.selector,
+        _token,
+        _from,
+        _to,
+        _amount,
+        GatewayMessageHandler.encodeFromL2GatewayMsg(exitNum, _data)
+    );
+
+    return outboundCalldata;
 }
 ```
 

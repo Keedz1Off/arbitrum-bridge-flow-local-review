@@ -3,13 +3,50 @@
 ## Function Code
 
 ```solidity
-// Paste the full AbsInbox._createRetryableTicket(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function _createRetryableTicket(
-    // paste exact parameters here
+    address to,
+    uint256 l2CallValue,
+    uint256 maxSubmissionCost,
+    address excessFeeRefundAddress,
+    address callValueRefundAddress,
+    uint256 gasLimit,
+    uint256 maxFeePerGas,
+    uint256 amount,
+    bytes calldata data
 ) internal returns (uint256) {
-    // paste exact function body here
+    // Ensure the user's deposit alone will make submission succeed.
+    // In case of native token having non-18 decimals: 'amount' is denominated in native token's decimals. All other
+    // value params - l2CallValue, maxSubmissionCost and maxFeePerGas are denominated in child chain's native 18 decimals.
+    uint256 amountToBeMintedOnL2 = _fromNativeTo18Decimals(amount);
+    if (amountToBeMintedOnL2 < (maxSubmissionCost + l2CallValue + gasLimit * maxFeePerGas)) {
+        revert InsufficientValue(
+            maxSubmissionCost + l2CallValue + gasLimit * maxFeePerGas, amountToBeMintedOnL2
+        );
+    }
+
+    // if a refund address is a contract, we apply the alias to it
+    // so that it can access its funds on the L2
+    // since the beneficiary and other refund addresses don't get rewritten by arb-os
+    if (AddressUpgradeable.isContract(excessFeeRefundAddress)) {
+        excessFeeRefundAddress = AddressAliasHelper.applyL1ToL2Alias(excessFeeRefundAddress);
+    }
+    if (AddressUpgradeable.isContract(callValueRefundAddress)) {
+        // this is the beneficiary. be careful since this is the address that can cancel the retryable in the L2
+        callValueRefundAddress = AddressAliasHelper.applyL1ToL2Alias(callValueRefundAddress);
+    }
+
+    // gas limit is validated to be within uint64 in unsafeCreateRetryableTicket
+    return _unsafeCreateRetryableTicket(
+        to,
+        l2CallValue,
+        maxSubmissionCost,
+        excessFeeRefundAddress,
+        callValueRefundAddress,
+        gasLimit,
+        maxFeePerGas,
+        amount,
+        data
+    );
 }
 ```
 

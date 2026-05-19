@@ -3,13 +3,48 @@
 ## Function Code
 
 ```solidity
-// Paste the full finalizeInboundTransfer(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function finalizeInboundTransfer(
-    // paste exact parameters here
-) external payable {
-    // paste exact function body here
+    address _token,
+    address _from,
+    address _to,
+    uint256 _amount,
+    bytes calldata _data
+) external payable override onlyCounterpartGateway {
+    (bytes memory gatewayData, bytes memory callHookData) = GatewayMessageHandler
+        .parseFromL1GatewayMsg(_data);
+
+    if (callHookData.length != 0) {
+        // callHookData should always be 0 since inboundEscrowAndCall is disabled
+        callHookData = bytes("");
+    }
+
+    address expectedAddress = calculateL2TokenAddress(_token);
+
+    if (!expectedAddress.isContract()) {
+        bool shouldHalt = handleNoContract(
+            _token,
+            expectedAddress,
+            _from,
+            _to,
+            _amount,
+            gatewayData
+        );
+        if (shouldHalt) return;
+    }
+
+    // validate if L1 address supplied matches that of the expected L2 address
+    bool shouldWithdraw = !_isValidTokenAddress(_token, expectedAddress);
+    if (shouldWithdraw) {
+        // we don't need the return value from triggerWithdrawal since this is forcing
+        // a withdrawal back to the L1 instead of composing with a L2 dapp
+        triggerWithdrawal(_token, address(this), _from, _amount, "");
+        return;
+    }
+
+    inboundEscrowTransfer(expectedAddress, _to, _amount);
+    emit DepositFinalized(_token, _from, _to, _amount);
+
+    return;
 }
 ```
 

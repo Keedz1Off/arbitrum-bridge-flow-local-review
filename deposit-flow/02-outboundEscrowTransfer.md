@@ -3,13 +3,17 @@
 ## Function Code
 
 ```solidity
-// Paste the full outboundEscrowTransfer(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function outboundEscrowTransfer(
-    // paste exact parameters here
-) internal returns (uint256) {
-    // paste exact function body here
+    address _l1Token,
+    address _from,
+    uint256 _amount
+) internal virtual returns (uint256 amountReceived) {
+    // this method is virtual since different subclasses can handle escrow differently
+    // user funds are escrowed on the gateway using this function
+    uint256 prevBalance = IERC20(_l1Token).balanceOf(address(this));
+    IERC20(_l1Token).safeTransferFrom(_from, address(this), _amount);
+    uint256 postBalance = IERC20(_l1Token).balanceOf(address(this));
+    return postBalance - prevBalance;
 }
 ```
 

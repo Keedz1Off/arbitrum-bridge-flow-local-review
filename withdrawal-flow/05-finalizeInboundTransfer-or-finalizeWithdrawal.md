@@ -3,13 +3,28 @@
 ## Function Code
 
 ```solidity
-// Paste the full finalizeInboundTransfer(...) or finalizeWithdrawal(...) function code here.
-// Use the exact code from the contract version you are reviewing.
+function finalizeInboundTransfer(
+    address _token,
+    address _from,
+    address _to,
+    uint256 _amount,
+    bytes calldata _data
+) public payable virtual override onlyCounterpartGateway {
+    // this function is marked as virtual so superclasses can override it to add modifiers
+    (uint256 exitNum, bytes memory callHookData) = GatewayMessageHandler.parseToL1GatewayMsg(
+        _data
+    );
 
-function finalizeWithdrawal(
-    // paste exact parameters here
-) external {
-    // paste exact function body here
+    if (callHookData.length != 0) {
+        // callHookData should always be 0 since inboundEscrowAndCall is disabled
+        callHookData = bytes("");
+    }
+
+    // we ignore the returned data since the callHook feature is now disabled
+    (_to, ) = getExternalCall(exitNum, _to, callHookData);
+    inboundEscrowTransfer(_token, _to, _amount);
+
+    emit WithdrawalFinalized(_token, _from, _to, exitNum, _amount);
 }
 ```
 

@@ -3,13 +3,29 @@
 ## Function Code
 
 ```solidity
-// Paste the full getOutboundCalldata(...) function code here.
-// Use the exact code from the contract version you are reviewing.
-
 function getOutboundCalldata(
-    // paste exact parameters here
-) public view returns (bytes memory) {
-    // paste exact function body here
+    address _l1Token,
+    address _from,
+    address _to,
+    uint256 _amount,
+    bytes memory _data
+) public view virtual override returns (bytes memory outboundCalldata) {
+    // this function is public so users can query how much calldata will be sent to the L2
+    // before execution
+    // it is virtual since different gateway subclasses can build this calldata differently
+    // ( ie the standard ERC20 gateway queries for a tokens name/symbol/decimals )
+    bytes memory emptyBytes = "";
+
+    outboundCalldata = abi.encodeWithSelector(
+        ITokenGateway.finalizeInboundTransfer.selector,
+        _l1Token,
+        _from,
+        _to,
+        _amount,
+        GatewayMessageHandler.encodeToL2GatewayMsg(emptyBytes, _data)
+    );
+
+    return outboundCalldata;
 }
 ```
 
