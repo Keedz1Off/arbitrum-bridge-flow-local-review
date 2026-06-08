@@ -37,7 +37,7 @@ concepts/
 Separate explanations of important bridge concepts, such as Arbitrum address aliasing.
 
 ```text
-breaksync/
+break-think/
 ```
 
 Folder for manual Break Think analysis:
@@ -159,7 +159,7 @@ arbitrum-bridge-flow-local-review/
 |-- concepts/
 |   `-- address-aliasing.md
 |
-`-- breaksync/
+`-- break-think/
     `-- README.md
 ```
 
@@ -258,7 +258,7 @@ The current focus of the repository is:
 - function-level explanations
 - important bridge concepts
 
-The `breaksync/` folder is reserved for a future manual BreakSync-style analysis, where each function will be reviewed separately in more depth.
+The `break-think/` folder is reserved for a future manual Break Think-style analysis, where each function will be reviewed separately in more depth.
 
 ---
 
