@@ -80,9 +80,40 @@ The release amount should match the verified burned / locked amount from L2.
 
 ## Invariants
 
-- Only an authentic L2 -> L1 bridge message may finalize a withdrawal.
-- The counterpart gateway must be the expected gateway.
-- Decoded amount must match the amount burned / locked on L2.
-- Decoded recipient must match the intended L1 recipient.
-- Decoded token must match the correct L1 token.
-- The same withdrawal message must not finalize twice.
+### Main Invariant 1
+
+```text
+Only an authentic L2 -> L1 bridge message may finalize a withdrawal.
+```
+
+### Main Invariant 2
+
+```text
+The counterpart gateway must be the expected gateway.
+```
+
+### Main Invariant 3
+
+```text
+Decoded amount must match the amount burned / locked on L2.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+Decoded recipient must match the intended L1 recipient.
+```
+
+### Additional Invariant 2
+
+```text
+Decoded token must match the correct L1 token.
+```
+
+### Additional Invariant 3
+
+```text
+The same withdrawal message must not finalize twice.
+```

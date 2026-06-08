@@ -67,9 +67,40 @@ If the token behaves unexpectedly, the release may fail or create inconsistent a
 
 ## Invariants
 
-- Released amount on L1 must equal the verified burned / locked amount on L2.
-- Only the authorized gateway/finalizer may release escrowed tokens.
-- The recipient must match the finalized withdrawal message.
-- The released token must be the expected L1 token.
-- Escrow must not release more tokens than it holds.
-- The same finalized message must not trigger release twice.
+### Main Invariant 1
+
+```text
+Released amount on L1 must equal the verified burned / locked amount on L2.
+```
+
+### Main Invariant 2
+
+```text
+Only the authorized gateway/finalizer may release escrowed tokens.
+```
+
+### Main Invariant 3
+
+```text
+The recipient must match the finalized withdrawal message.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+The released token must be the expected L1 token.
+```
+
+### Additional Invariant 2
+
+```text
+Escrow must not release more tokens than it holds.
+```
+
+### Additional Invariant 3
+
+```text
+The same finalized message must not trigger release twice.
+```

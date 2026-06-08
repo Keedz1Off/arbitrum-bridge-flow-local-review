@@ -78,9 +78,40 @@ If the formats differ, L1 may decode the wrong amount, token, or recipient.
 
 ## Invariants
 
-- Encoded calldata must represent the real L2 withdrawal.
-- Encoded amount must match the burned / locked amount.
-- Encoded recipient must match the intended L1 recipient.
-- Encoded token must match the correct L1 token mapping.
-- L2 encoding must match L1 decoding.
-- Extra data must not override critical values in an unsafe way.
+### Main Invariant 1
+
+```text
+Encoded calldata must represent the real L2 withdrawal.
+```
+
+### Main Invariant 2
+
+```text
+Encoded amount must match the burned / locked amount.
+```
+
+### Main Invariant 3
+
+```text
+Encoded recipient must match the intended L1 recipient.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+Encoded token must match the correct L1 token mapping.
+```
+
+### Additional Invariant 2
+
+```text
+L2 encoding must match L1 decoding.
+```
+
+### Additional Invariant 3
+
+```text
+Extra data must not override critical values in an unsafe way.
+```

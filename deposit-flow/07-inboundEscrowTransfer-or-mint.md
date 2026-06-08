@@ -67,9 +67,40 @@ If this step mints representation tokens, minter permissions and supply accounti
 
 ## Invariants
 
-- Minted / released amount on L2 must equal the verified L1 escrowed amount.
-- Only the authorized gateway/finalizer may mint or release tokens.
-- The recipient must match the finalized bridge message.
-- The credited token must be the expected L2 token.
-- L2 token supply must remain backed by L1 escrow.
-- The same finalized message must not trigger mint/release twice.
+### Main Invariant 1
+
+```text
+Minted / released amount on L2 must equal the verified L1 escrowed amount.
+```
+
+### Main Invariant 2
+
+```text
+Only the authorized gateway/finalizer may mint or release tokens.
+```
+
+### Main Invariant 3
+
+```text
+The recipient must match the finalized bridge message.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+The credited token must be the expected L2 token.
+```
+
+### Additional Invariant 2
+
+```text
+L2 token supply must remain backed by L1 escrow.
+```
+
+### Additional Invariant 3
+
+```text
+The same finalized message must not trigger mint/release twice.
+```

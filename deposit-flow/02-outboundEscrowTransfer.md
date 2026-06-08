@@ -132,10 +132,46 @@ The returned value should represent the real escrowed/received amount, not only 
 
 ## Invariants
 
-- Tokens must actually move from the user to the L1 bridge/escrow.
-- Failed token transfer must stop the deposit flow.
-- L1 escrowed amount must equal L2 minted / released amount.
-- The amount used downstream should match the real received / escrowed amount.
-- For fee-on-transfer or non-standard tokens, accounting should not blindly trust user-supplied `amount`.
-- The token being escrowed must be the intended L1 token.
-- L2 credit must not happen without successful L1 escrow.
+### Main Invariant 1
+
+```text
+Tokens must actually move from the user to the L1 bridge/escrow.
+```
+
+### Main Invariant 2
+
+```text
+Failed token transfer must stop the deposit flow.
+```
+
+### Main Invariant 3
+
+```text
+L1 escrowed amount must equal L2 minted / released amount.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+The amount used downstream should match the real received / escrowed amount.
+```
+
+### Additional Invariant 2
+
+```text
+For fee-on-transfer or non-standard tokens, accounting should not blindly trust user-supplied `amount`.
+```
+
+### Additional Invariant 3
+
+```text
+The token being escrowed must be the intended L1 token.
+```
+
+### Additional Invariant 4
+
+```text
+L2 credit must not happen without successful L1 escrow.
+```

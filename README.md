@@ -40,7 +40,13 @@ Separate explanations of important bridge concepts, such as Arbitrum address ali
 breaksync/
 ```
 
-Placeholder folder for a future BreakSync-style manual analysis.
+Folder for manual Break Think analysis:
+
+```text
+Invariant -> Break -> Consequence
+```
+
+In this folder, I choose the most important invariants and write what can happen if they break.
 
 ---
 
@@ -155,6 +161,89 @@ arbitrum-bridge-flow-local-review/
 |
 `-- breaksync/
     `-- README.md
+```
+
+---
+
+## Core Functions Reviewed
+
+This repository focuses on the functions that carry the main bridge logic.
+
+Deposit flow:
+
+```text
+outboundTransfer(...)
+outboundEscrowTransfer(...)
+getOutboundCalldata(...)
+createRetryableTicket(...)
+AbsInbox._createRetryableTicket(...)
+finalizeInboundTransfer(...)
+inboundEscrowTransfer(...) / mint(...)
+```
+
+Withdrawal flow:
+
+```text
+outboundTransfer(...) / withdraw(...)
+burn(...) / lock(...)
+getOutboundCalldata(...)
+createOutboundTx(...)
+finalizeInboundTransfer(...) / finalizeWithdrawal(...)
+inboundEscrowTransfer(...) / release(...)
+```
+
+---
+
+## Global Invariants
+
+### Main Global Invariants
+
+```text
+L1 locked / escrowed amount = L2 minted / released amount
+```
+
+```text
+L2 burned / locked amount = L1 released amount
+```
+
+```text
+Only authentic bridge messages can finalize deposits or withdrawals.
+```
+
+### Additional Deposit Invariants
+
+```text
+The L1 token must map to the correct L2 token.
+```
+
+```text
+The recipient encoded in calldata must be the intended recipient.
+```
+
+```text
+The retryable ticket must target the correct L2 gateway.
+```
+
+```text
+The same deposit message must not be finalized twice.
+```
+
+### Additional Withdrawal Invariants
+
+```text
+The L2 token must map to the correct L1 token.
+```
+
+```text
+The L1 recipient must be the intended recipient.
+```
+
+```text
+The outbound message must target the correct L1 gateway.
+```
+
+```text
+The same withdrawal message must not be finalized twice.
 ```
 
 ---

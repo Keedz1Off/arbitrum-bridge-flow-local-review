@@ -114,10 +114,46 @@ That final token credit must use the verified amount and recipient.
 
 ## Invariants
 
-- Only an authentic L1 -> L2 bridge message may finalize a deposit.
-- The counterpart gateway must be the expected gateway.
-- Address aliasing must be handled correctly when relevant.
-- Decoded amount must match the amount backed by L1 escrow.
-- Decoded recipient must match the intended L2 recipient.
-- Decoded token must match the correct token mapping.
-- The same message must not finalize twice.
+### Main Invariant 1
+
+```text
+Only an authentic L1 -> L2 bridge message may finalize a deposit.
+```
+
+### Main Invariant 2
+
+```text
+The counterpart gateway must be the expected gateway.
+```
+
+### Main Invariant 3
+
+```text
+Address aliasing must be handled correctly when relevant.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+Decoded amount must match the amount backed by L1 escrow.
+```
+
+### Additional Invariant 2
+
+```text
+Decoded recipient must match the intended L2 recipient.
+```
+
+### Additional Invariant 3
+
+```text
+Decoded token must match the correct token mapping.
+```
+
+### Additional Invariant 4
+
+```text
+The same message must not finalize twice.
+```

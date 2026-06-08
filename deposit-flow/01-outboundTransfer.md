@@ -142,12 +142,58 @@ A retryable ticket can be valid at the messaging layer but still contain wrong b
 
 ## Invariants
 
-- L1 escrowed amount must equal L2 minted / released amount.
-- The selected L1 token must be the intended token.
-- The selected L1 token must map to the correct L2 token.
-- The L2 recipient must match the intended recipient.
-- Tokens must be escrowed / locked on L1 before L2 credit is finalized.
-- The amount encoded for L2 must match the real escrowed / received amount.
-- The calldata must match what the L2 finalize function expects.
-- The retryable ticket must target the correct L2 gateway.
-- The deposit message must not be finalized twice.
+### Main Invariant 1
+
+```text
+L1 escrowed amount must equal L2 minted / released amount.
+```
+
+### Main Invariant 2
+
+```text
+The selected L1 token must be the intended token.
+```
+
+### Main Invariant 3
+
+```text
+The selected L1 token must map to the correct L2 token.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+The L2 recipient must match the intended recipient.
+```
+
+### Additional Invariant 2
+
+```text
+Tokens must be escrowed / locked on L1 before L2 credit is finalized.
+```
+
+### Additional Invariant 3
+
+```text
+The amount encoded for L2 must match the real escrowed / received amount.
+```
+
+### Additional Invariant 4
+
+```text
+The calldata must match what the L2 finalize function expects.
+```
+
+### Additional Invariant 5
+
+```text
+The retryable ticket must target the correct L2 gateway.
+```
+
+### Additional Invariant 6
+
+```text
+The deposit message must not be finalized twice.
+```

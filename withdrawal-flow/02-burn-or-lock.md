@@ -64,9 +64,40 @@ If burn/lock fails or moves a different amount, the withdrawal message must not 
 
 ## Invariants
 
-- Tokens must be burned or locked before L1 release.
-- Burned / locked amount must equal L1 released amount.
-- Failed burn/lock must stop the withdrawal flow.
-- The token being burned/locked must be the intended L2 token.
-- The amount used downstream must match the real burned / locked amount.
-- L1 release must not happen without successful L2 burn/lock.
+### Main Invariant 1
+
+```text
+Tokens must be burned or locked before L1 release.
+```
+
+### Main Invariant 2
+
+```text
+Burned / locked amount must equal L1 released amount.
+```
+
+### Main Invariant 3
+
+```text
+Failed burn/lock must stop the withdrawal flow.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+The token being burned/locked must be the intended L2 token.
+```
+
+### Additional Invariant 2
+
+```text
+The amount used downstream must match the real burned / locked amount.
+```
+
+### Additional Invariant 3
+
+```text
+L1 release must not happen without successful L2 burn/lock.
+```

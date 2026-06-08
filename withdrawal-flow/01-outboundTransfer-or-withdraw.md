@@ -110,10 +110,46 @@ If the message is created without a real burn/lock, L1 may release unbacked fund
 
 ## Invariants
 
-- L2 burned / locked amount must equal L1 released amount.
-- The selected L2 token must map to the correct L1 token.
-- The L1 recipient must match the intended recipient.
-- Burn/lock must happen before L1 release is finalized.
-- The amount encoded for L1 must match the real burned / locked amount.
-- The outbound message must target the correct L1 gateway.
-- The withdrawal message must not be finalized twice.
+### Main Invariant 1
+
+```text
+L2 burned / locked amount must equal L1 released amount.
+```
+
+### Main Invariant 2
+
+```text
+The selected L2 token must map to the correct L1 token.
+```
+
+### Main Invariant 3
+
+```text
+The L1 recipient must match the intended recipient.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+Burn/lock must happen before L1 release is finalized.
+```
+
+### Additional Invariant 2
+
+```text
+The amount encoded for L1 must match the real burned / locked amount.
+```
+
+### Additional Invariant 3
+
+```text
+The outbound message must target the correct L1 gateway.
+```
+
+### Additional Invariant 4
+
+```text
+The withdrawal message must not be finalized twice.
+```

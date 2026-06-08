@@ -107,9 +107,40 @@ If these formats differ, L2 may decode the wrong amount, token, or recipient.
 
 ## Invariants
 
-- Encoded calldata must represent the real L1 deposit.
-- Encoded amount must match the escrowed / actual received amount.
-- Encoded recipient must match the intended L2 recipient.
-- Encoded token must match the correct token mapping.
-- L1 encoding must match L2 decoding.
-- Extra data must not override critical values in an unsafe way.
+### Main Invariant 1
+
+```text
+Encoded calldata must represent the real L1 deposit.
+```
+
+### Main Invariant 2
+
+```text
+Encoded amount must match the escrowed / actual received amount.
+```
+
+### Main Invariant 3
+
+```text
+Encoded recipient must match the intended L2 recipient.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+Encoded token must match the correct token mapping.
+```
+
+### Additional Invariant 2
+
+```text
+L1 encoding must match L2 decoding.
+```
+
+### Additional Invariant 3
+
+```text
+Extra data must not override critical values in an unsafe way.
+```

@@ -104,8 +104,34 @@ This does not directly decide token amount, but it can affect whether the L2 mes
 
 ## Invariants
 
-- The retryable ticket must preserve the intended L2 target.
-- The retryable ticket must preserve the intended calldata.
-- L2 sender assumptions must match Arbitrum aliasing rules.
-- Gas and payment values must be sufficient for message creation/execution.
-- Refund behavior must not redirect value in an unintended way.
+### Main Invariant 1
+
+```text
+The retryable ticket must preserve the intended L2 target.
+```
+
+### Main Invariant 2
+
+```text
+The retryable ticket must preserve the intended calldata.
+```
+
+### Main Invariant 3
+
+```text
+L2 sender assumptions must match Arbitrum aliasing rules.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+Gas and payment values must be sufficient for message creation/execution.
+```
+
+### Additional Invariant 2
+
+```text
+Refund behavior must not redirect value in an unintended way.
+```

@@ -73,7 +73,28 @@ This matters for replay protection and finalization tracking.
 
 ## Invariants
 
-- Outbound message must target the correct L1 gateway.
-- Outbound calldata must match the verified L2 withdrawal.
-- Message identity must prevent duplicate finalization.
-- L1 release must only happen through a valid L2 -> L1 message.
+### Main Invariant 1
+
+```text
+Outbound message must target the correct L1 gateway.
+```
+
+### Main Invariant 2
+
+```text
+Outbound calldata must match the verified L2 withdrawal.
+```
+
+### Main Invariant 3
+
+```text
+Message identity must prevent duplicate finalization.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+L1 release must only happen through a valid L2 -> L1 message.
+```

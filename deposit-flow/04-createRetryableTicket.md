@@ -92,8 +92,34 @@ If these values are unsafe, the deposit may become delayed, fail, or redirect va
 
 ## Invariants
 
-- Retryable ticket must target the correct L2 gateway.
-- Retryable calldata must match the verified L1 deposit.
-- Retryable execution budget must be sufficient for finalization.
-- Refund handling must not corrupt bridge accounting.
-- The ticket must not allow the same deposit to be finalized twice.
+### Main Invariant 1
+
+```text
+Retryable ticket must target the correct L2 gateway.
+```
+
+### Main Invariant 2
+
+```text
+Retryable calldata must match the verified L1 deposit.
+```
+
+### Main Invariant 3
+
+```text
+Retryable execution budget must be sufficient for finalization.
+```
+
+## Additional Invariants
+
+### Additional Invariant 1
+
+```text
+Refund handling must not corrupt bridge accounting.
+```
+
+### Additional Invariant 2
+
+```text
+The ticket must not allow the same deposit to be finalized twice.
+```
