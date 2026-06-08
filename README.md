@@ -169,26 +169,36 @@ arbitrum-bridge-flow-local-review/
 
 This repository focuses on the functions that carry the main bridge logic.
 
-Deposit flow:
+### Main Deposit Functions
 
 ```text
 outboundTransfer(...)
 outboundEscrowTransfer(...)
+finalizeInboundTransfer(...)
+```
+
+### Additional Deposit Functions
+
+```text
 getOutboundCalldata(...)
 createRetryableTicket(...)
 AbsInbox._createRetryableTicket(...)
-finalizeInboundTransfer(...)
 inboundEscrowTransfer(...) / mint(...)
 ```
 
-Withdrawal flow:
+### Main Withdrawal Functions
 
 ```text
 outboundTransfer(...) / withdraw(...)
 burn(...) / lock(...)
+finalizeInboundTransfer(...) / finalizeWithdrawal(...)
+```
+
+### Additional Withdrawal Functions
+
+```text
 getOutboundCalldata(...)
 createOutboundTx(...)
-finalizeInboundTransfer(...) / finalizeWithdrawal(...)
 inboundEscrowTransfer(...) / release(...)
 ```
 
