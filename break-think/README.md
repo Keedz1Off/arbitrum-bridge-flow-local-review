@@ -1,7 +1,41 @@
-# break-think Analysis
+# Break Think Analysis
 
-This folder is reserved for a future break-think-style manual analysis.
+This folder is for manual Break Think analysis.
 
-The purpose of this section will be to review each important function independently and reason through possible invariant breaks, edge cases, and security assumptions.
+Break Think means:
 
-No full break-think analysis has been added yet.
+```text
+Invariant -> Break -> Consequence
+```
+
+## Main Deposit Functions
+
+```text
+outboundTransfer(...)
+outboundEscrowTransfer(...)
+finalizeInboundTransfer(...)
+```
+
+## Main Withdrawal Functions
+
+```text
+outboundTransfer(...) / withdraw(...)
+burn(...) / lock(...)
+finalizeInboundTransfer(...) / finalizeWithdrawal(...)
+```
+
+## Format
+
+```text
+Function:
+
+Invariant:
+
+Break:
+
+Consequence:
+```
+
+## Goal
+
+For each important function, choose the main invariants and explain what can happen if they break.
