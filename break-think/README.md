@@ -33,7 +33,11 @@ Invariant:
 
 Consequences:
 ```
+## Important 
 
-## Goal
+Here is most important functions!!!
 
-For each important function, choose the main invariants and explain what can happen if they break.
+
+
+
+
