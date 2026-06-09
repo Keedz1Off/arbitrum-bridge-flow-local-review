@@ -1,6 +1,28 @@
-DEPOSIT 
-L1 escrowed amount must equal L2 minted / released amount.
+# outboundTransfer()
 
-The selected L1 token must be the intended token.
+   ## Invariants
 
-The selected L1 token must map to the correct L2 token.
+1. L1 escrowed amount must equal L2 minted. 1,5. Or (actualReceived = balanceAfter - balanceBefore)
+
+2. The selected L1 token must be the intended token.
+
+   ## Concenquences
+1. This may lead to a diffrent amount mint, this usually happens when encoded data (message). 1,5. This may lead to unbacked tokens.
+
+
+2. This may lead to minting another token instead of the inteded token.
+
+
+ # outboundEscrowTransfer()
+
+
+
+
+
+  ## Invariants
+
+
+
+ 
+  ## Concenquences
+
