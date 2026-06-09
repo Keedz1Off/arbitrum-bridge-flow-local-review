@@ -43,7 +43,7 @@ break-think/
 Folder for manual Break Think analysis:
 
 ```text
-Invariant -> Break -> Consequence
+Invariant -> Consequence
 ```
 
 In this folder, I choose the most important invariants and write what can happen if they break.

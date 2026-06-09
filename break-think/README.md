@@ -5,7 +5,7 @@ This folder is for manual Break Think analysis.
 Break Think means:
 
 ```text
-Invariant -> Break -> Consequence
+Invariant -> Consequence
 ```
 
 ## Main Deposit Functions
@@ -31,9 +31,7 @@ Function:
 
 Invariant:
 
-Break:
-
-Consequence:
+Consequences:
 ```
 
 ## Goal
