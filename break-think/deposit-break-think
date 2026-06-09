@@ -1,1 +1,6 @@
+DEPOSIT 
+L1 escrowed amount must equal L2 minted / released amount.
 
+The selected L1 token must be the intended token.
+
+The selected L1 token must map to the correct L2 token.
