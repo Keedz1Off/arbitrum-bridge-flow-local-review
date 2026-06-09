@@ -9,20 +9,32 @@
    ## Concenquences
 1. This may lead to a diffrent amount mint, this usually happens when encoded data (message). 1,5. This may lead to unbacked tokens.
 
-
 2. This may lead to minting another token instead of the inteded token.
 
 
  # outboundEscrowTransfer()
 
-
-
-
-
   ## Invariants
 
+1. Tokens must actually move from the user to the L1 bridge/escrow.
 
+2. Failed token transfer must stop the deposit flow.
+
+3. L1 escrowed amount must equal L2 minted. 1,5. Or (actualReceived = balanceAfter - balanceBefore).
 
  
+  ## Concenquences
+1. The token locking happens, but the message is not created.
+
+2. The Funds stucks forever.
+
+3. This may lead to a diffrent amount mint, this usually happens when encoded data (message). 1,5. This may lead to unbacked tokens. 
+
+
+ ## Invariants
+
+
+
+
   ## Concenquences
 
