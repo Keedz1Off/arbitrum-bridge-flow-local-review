@@ -13,6 +13,8 @@ Invariant -> Consequence
 ```text
 outboundTransfer(...)
 outboundEscrowTransfer(...)
+createRetryableTicket(...)
+AbsInbox._createRetryableTicket(...)
 finalizeInboundTransfer(...)
 ```
 
