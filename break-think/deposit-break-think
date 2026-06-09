@@ -30,8 +30,17 @@
 
 3. This may lead to a diffrent amount mint, this usually happens when encoded data (message). 1,5. This may lead to unbacked tokens. 
 
+# createRetrybleTicket()
+
+## Invariant
+
+
+## Concenquences
+
+
 
 # finalizeInboundTransfer(...)
+
  ## Invariants
 
 
