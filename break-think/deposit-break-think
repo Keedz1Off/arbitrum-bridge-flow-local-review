@@ -52,15 +52,19 @@
 
 ## Invariants
 
+The retryable ticket must preserve the intended L2 target.
 
+The retryable ticket must preserve the intended calldata.
+
+L2 sender assumptions must match Arbitrum aliasing rules.
 
 ## Concenquences
 
-1.
+1. This may lead to minting on the wrong L2 bridge.
 
-2. This may lead to minting on the wrong L2 bridge.
+2. An attacker changes calldata (_to, _amount) which is may lead to wrong excution.
 
-3.
+3. Without aliasing, L2 may see the wrong sender for the message.
 
 
 # finalizeInboundTransfer(...)
