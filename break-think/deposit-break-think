@@ -71,8 +71,18 @@ L2 sender assumptions must match Arbitrum aliasing rules.
 
  ## Invariants
 
+1. Only an authentic L1 -> L2 bridge message may finalize a deposit.
 
+2. The counterpart gateway must be the expected gateway.
+
+3. Address aliasing must be handled correctly when relevant.
 
 
  ## Concenquences
+
+1. Fake message can mint tokens on L2.
+
+2. Wrong gateway can execute the wrong bridge message.
+
+3. Without aliasing, L2 may see the wrong sender for the message.
 
