@@ -45,9 +45,22 @@
 1. This may lead to fund loss, because the L2 user did not get the fund.
 
 2. An attacker changes the data that is may lead to minting the wrong amount on L2 (finalization)
-(
+
 3. This may lead to fund stuck (delayed finalization)
 
+# AbsInbox-createRetrybleTicket()
+
+## Invariants
+
+
+
+## Concenquences
+
+1.
+
+2.
+
+3.
 
 
 # finalizeInboundTransfer(...)
