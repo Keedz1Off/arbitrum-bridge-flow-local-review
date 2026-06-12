@@ -1,7 +1,16 @@
 # outboundTransfer()
 
 ## Invariant
+1. L2 burned / locked amount must equal L1 released amount.
 
+2. The selected L2 token must map to the correct L1 token.
+
+3. The L1 recipient must match the intended recipient.
 
 ## Concenquences
 
+ 1. The Bridge releases more or less tokens than the actually burned tokens.
+
+ 2. The token on L1 does not match the token on L2, that is user receives the wrong token.
+
+ 3. The tokens may be lost.
