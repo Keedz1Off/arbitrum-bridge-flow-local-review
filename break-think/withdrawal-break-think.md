@@ -35,10 +35,9 @@
 
 3. This may lead to releasing without burning L2 tokens (message  --->  release or unlock)
 
-finalizeInboundTransfer()
 
-L2 может увидеть неправильного sender
-refund может уйти не туда
+
+# finalizeInboundTransfer()
 
 
 ## Invariants
