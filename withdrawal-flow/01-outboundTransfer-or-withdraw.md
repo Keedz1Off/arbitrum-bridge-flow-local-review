@@ -57,7 +57,7 @@ At a high level, this function usually:
 
 - receives withdrawal parameters from the user
 - selects the correct token/gateway path
-- burns or locks tokens on L2
+- burns tokens on L2
 - builds calldata for L1 finalization
 - creates the outbound L2 -> L1 message
 
@@ -96,15 +96,15 @@ Wrong mapping may release the wrong asset on L1.
 
 ---
 
-### Burn / Lock Step
+### Burn Step
 
-The function should remove or lock the user's L2 token balance before L1 release can happen.
+The function should burn the user's L2 token balance before L1 release can happen.
 
 ```text
-burned / locked on L2 -> released on L1
+burned on L2 -> released on L1
 ```
 
-If the message is created without a real burn/lock, L1 may release unbacked funds.
+If the message is created without a real burn, L1 may release unbacked funds.
 
 ---
 
@@ -113,7 +113,7 @@ If the message is created without a real burn/lock, L1 may release unbacked fund
 ### Main Invariant 1
 
 ```text
-L2 burned / locked amount must equal L1 released amount.
+L2 burned amount must equal L1 released amount.
 ```
 
 ### Main Invariant 2
@@ -133,13 +133,13 @@ The L1 recipient must match the intended recipient.
 ### Additional Invariant 1
 
 ```text
-Burn/lock must happen before L1 release is finalized.
+burn must happen before L1 release is finalized.
 ```
 
 ### Additional Invariant 2
 
 ```text
-The amount encoded for L1 must match the real burned / locked amount.
+The amount encoded for L1 must match the real burned amount.
 ```
 
 ### Additional Invariant 3

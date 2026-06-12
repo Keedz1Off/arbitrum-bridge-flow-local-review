@@ -1,4 +1,4 @@
-# Function Review: burn(...) / lock(...)
+# Function Review: burn(...)
 
 ## Function Code
 
@@ -22,14 +22,14 @@ function outboundEscrowTransfer(
 
 ## Function Explanation
 
-`burn(...)` / `lock(...)` is the L2 accounting step in the withdrawal flow.
+`burn(...)` is the L2 accounting step in the withdrawal flow.
 
-This function removes or locks the user's L2 token balance before the bridge requests release on L1.
+This function removes the user's L2 token balance before the bridge requests release on L1.
 
 Main idea:
 
 ```text
-L1 must release only what was actually burned or locked on L2.
+L1 must release only what was actually burned on L2.
 ```
 
 If this step does not happen correctly, the bridge may release L1 escrow without proper L2 backing.
@@ -46,19 +46,11 @@ This creates the economic basis for releasing tokens on L1.
 
 ---
 
-### Lock Logic
-
-If the function locks tokens instead of burning, the locked amount must be tracked correctly.
-
-The locked amount should match the amount encoded for L1 release.
-
----
-
 ### Amount Used Downstream
 
-The amount used in the L1 withdrawal message should match the real burned or locked amount.
+The amount used in the L1 withdrawal message should match the real burned amount.
 
-If burn/lock fails or moves a different amount, the withdrawal message must not proceed with the wrong value.
+If burn fails or moves a different amount, the withdrawal message must not proceed with the wrong value.
 
 ---
 
@@ -67,19 +59,19 @@ If burn/lock fails or moves a different amount, the withdrawal message must not 
 ### Main Invariant 1
 
 ```text
-Tokens must be burned or locked before L1 release.
+Tokens must be burned before L1 release.
 ```
 
 ### Main Invariant 2
 
 ```text
-Burned / locked amount must equal L1 released amount.
+burned amount must equal L1 released amount.
 ```
 
 ### Main Invariant 3
 
 ```text
-Failed burn/lock must stop the withdrawal flow.
+Failed burn must stop the withdrawal flow.
 ```
 
 ## Additional Invariants
@@ -87,17 +79,17 @@ Failed burn/lock must stop the withdrawal flow.
 ### Additional Invariant 1
 
 ```text
-The token being burned/locked must be the intended L2 token.
+The token being burned must be the intended L2 token.
 ```
 
 ### Additional Invariant 2
 
 ```text
-The amount used downstream must match the real burned / locked amount.
+The amount used downstream must match the real burned amount.
 ```
 
 ### Additional Invariant 3
 
 ```text
-L1 release must not happen without successful L2 burn/lock.
+L1 release must not happen without successful L2 burn.
 ```

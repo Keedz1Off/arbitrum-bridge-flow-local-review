@@ -89,7 +89,7 @@ Withdrawal direction:
 ```mermaid
 flowchart TD
     A["L2 User"] --> B["L2 Gateway"]
-    B --> C["Burn / Lock Token"]
+    B --> C["burn Token"]
     C --> D["Outbox Message"]
     D --> E["L2 -> L1 Proof"]
     E --> F["L1 Gateway"]
@@ -103,7 +103,7 @@ L2 User
   v
 L2 Gateway
   |
-  | burn / lock token
+  | burn token
   v
 Outbox Message
   |
@@ -150,7 +150,7 @@ arbitrum-bridge-flow-local-review/
 |
 |-- withdrawal-flow/
 |   |-- 01-outboundTransfer-or-withdraw.md
-|   |-- 02-burn-or-lock.md
+|   |-- 02-burn.md
 |   |-- 03-getOutboundCalldata.md
 |   |-- 04-createOutboundTx.md
 |   |-- 05-finalizeInboundTransfer-or-finalizeWithdrawal.md
@@ -190,7 +190,7 @@ inboundEscrowTransfer(...) / mint(...)
 
 ```text
 outboundTransfer(...) / withdraw(...)
-burn(...) / lock(...)
+burn(...)
 finalizeInboundTransfer(...) / finalizeWithdrawal(...)
 ```
 
@@ -213,7 +213,7 @@ L1 locked / escrowed amount = L2 minted / released amount
 ```
 
 ```text
-L2 burned / locked amount = L1 released amount
+L2 burned amount = L1 released amount
 ```
 
 ```text

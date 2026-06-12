@@ -58,9 +58,9 @@ Important values usually include:
 
 ### Amount in Calldata
 
-The encoded amount should match the amount actually burned or locked on L2.
+The encoded amount should match the amount actually burned on L2.
 
-If the encoded amount is larger than the burned/locked amount, L1 may release too much.
+If the encoded amount is larger than the burned amount, L1 may release too much.
 
 ---
 
@@ -87,7 +87,7 @@ Encoded calldata must represent the real L2 withdrawal.
 ### Main Invariant 2
 
 ```text
-Encoded amount must match the burned / locked amount.
+Encoded amount must match the burned amount.
 ```
 
 ### Main Invariant 3

@@ -22,7 +22,7 @@ finalizeInboundTransfer(...)
 
 ```text
 outboundTransfer(...) / withdraw(...)
-burn(...) / lock(...)
+burn(...)
 finalizeInboundTransfer(...) / finalizeWithdrawal(...)
 ```
 

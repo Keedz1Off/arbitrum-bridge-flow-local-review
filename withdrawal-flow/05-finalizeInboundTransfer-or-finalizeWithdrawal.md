@@ -74,7 +74,7 @@ These values must match the message created on L2.
 
 After verification, this function releases escrowed L1 tokens to the recipient.
 
-The release amount should match the verified burned / locked amount from L2.
+The release amount should match the verified burned amount from L2.
 
 ---
 
@@ -95,7 +95,7 @@ The counterpart gateway must be the expected gateway.
 ### Main Invariant 3
 
 ```text
-Decoded amount must match the amount burned / locked on L2.
+Decoded amount must match the amount burned on L2.
 ```
 
 ## Additional Invariants
