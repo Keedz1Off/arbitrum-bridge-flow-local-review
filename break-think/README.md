@@ -29,7 +29,7 @@ finalizeInboundTransfer(...) / finalizeWithdrawal(...)
 ## Format
 
 ```text
-Function:
+
 
 Invariant:
 
