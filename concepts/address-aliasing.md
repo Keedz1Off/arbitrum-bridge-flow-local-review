@@ -8,7 +8,7 @@ It is a security transformation applied to the msg.sender when a Smart Contract 
 
 # What actually happens without aliasing?????
 
-## Description: A finalization ( finalizeInboundTransfer() ) receives the address which is equal the L1,but  the finalization uses the address which is already exits on L2, that is the wrong smart contract with the same address.
+## The function receives an L1 address, but on L2 this address may be another smart contract. This can lead to calling the wrong contract.
 
 ## Graphic example
 <img width="1158" height="440" alt="image" src="https://github.com/user-attachments/assets/5df1ad4c-7876-43b7-9055-110c3e6e789d" />
