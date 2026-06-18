@@ -71,11 +71,11 @@ L2 sender assumptions must match Arbitrum aliasing rules.
 
  ## Invariants
 
-1. Only an authentic L1 -> L2 bridge message may finalize a deposit.
+1. Only an authentic L1 -> L2 bridge message can finalize a deposite.
 
 2. The counterpart gateway must be the expected gateway.
 
-3. Address aliasing must be handled correctly when relevant.
+3. The bridge must check the correct aliased address.
 
 
  ## Concenquences
