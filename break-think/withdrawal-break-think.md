@@ -1,7 +1,7 @@
 # outboundTransfer()
 
 ## Invariant
-1. L2 burned / locked amount must equal L1 released amount.
+1. L2 burned amount must equal L1 released amount.
 
 2. The selected L2 token must map to the correct L1 token.
 
