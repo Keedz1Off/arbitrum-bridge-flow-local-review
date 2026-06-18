@@ -36,7 +36,7 @@
 
 1. Retryable ticket must target the correct L2 gateway.
 
-2. Retryable calldata must match the verified L1 deposit.
+2. Retryable calldata must match the L1 deposit.
 
 3. Retryable execution budget must be sufficient for finalization.
 
