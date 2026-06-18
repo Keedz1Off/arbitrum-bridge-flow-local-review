@@ -3,9 +3,9 @@
 ## Invariant
 1. L2 burned amount must equal L1 released amount.
 
-2. The selected L2 token must map to the correct L1 token.
+2. The L2 token must map to the correct L1 token.
 
-3. The L1 recipient must match the intended recipient.
+3. The tokens must go to the correct recipient.
 
 ## Concenquences
 
@@ -21,7 +21,7 @@
 
 ## Invariants
 
-1. Tokens must be burned  before L1 release.
+1. Tokens must be burned before L1 release.
 
 2. Burned  amount must equal L1 released amount.
 
