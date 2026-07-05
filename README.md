@@ -1,6 +1,7 @@
 # Arbitrum Bridge Flow Local Review
 
-![Uploading image.png…]()
+<img width="1983" height="793" alt="image" src="https://github.com/user-attachments/assets/34fb68c1-dc90-4dde-bd62-4e3bcaf88293" />
+
 
 
 
