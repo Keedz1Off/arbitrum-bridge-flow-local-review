@@ -49,6 +49,14 @@ Invariant -> Consequence
 
 In this folder, I choose the most important invariants and write what can happen if they break.
 
+```text
+exploit-labs/
+```
+
+Simplified PoC-style notes for bridge vulnerabilities and protected/fixed cases.
+
+This section shows how `vm.expectRevert(...)` can be used when a protected function should reject an attack, and how normal assertions can be used when a vulnerable version allows the bad state.
+
 ---
 
 ## Bridge Flow Overview
@@ -160,6 +168,9 @@ arbitrum-bridge-flow-local-review/
 |-- concepts/
 |   `-- address-aliasing.md
 |
+|-- exploit-labs/
+|   `-- README.md
+|
 `-- break-think/
     `-- README.md
 ```
@@ -268,6 +279,7 @@ The current focus of the repository is:
 - withdrawal flow notes
 - function-level explanations
 - important bridge concepts
+- simplified PoC-style exploit notes
 
 The `break-think/` folder is reserved for a future manual Break Think-style analysis, where each function will be reviewed separately in more depth.
 
