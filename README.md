@@ -147,6 +147,7 @@ I partially used AI as a writing and organization assistant while preparing the 
 arbitrum-bridge-flow-local-review/
 |
 |-- README.md
+|-- glossary.md
 |
 |-- deposit-flow/
 |   |-- 01-outboundTransfer.md
@@ -180,6 +181,10 @@ arbitrum-bridge-flow-local-review/
 ## Core Functions Reviewed
 
 This repository focuses on the functions that carry the main bridge logic.
+
+## Glossary
+
+The `glossary.md` file contains important Arbitrum bridge terms used in this review.
 
 ### Main Deposit Functions
 
